@@ -1,0 +1,2 @@
+export const JWT_EMAIL_KEY = "T0B4uOmbQ9B2m7uBZv/B1B+QUz6tXlOIf/r/7xR+ybkYN+u/44o2nLIo6fxOpJFxlipQvcrubpGlfcSpZAwq2kCwXdollse04d27/m4qif185gC7rL4AwtCDyyvKG30aazRElNsTLauhzbW4uX8MSVDcYB4uGXp/yRxiqYHfo7SD94LtN9NJJe0i2Wj+BlZJzrXmvT0EwTnZ4hNjOY4qZQ=="
+export const JWT_PASS_KEY = "17f4059980d9b11280eed7f86ca84cbe"

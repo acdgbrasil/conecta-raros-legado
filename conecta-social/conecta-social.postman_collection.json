@@ -1,0 +1,352 @@
+{
+	"info": {
+		"_postman_id": "conecta-social-id",
+		"name": "Conecta Social API",
+		"description": "Collection for Conecta Social project controllers",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"pass\": \"password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New User\",\n    \"email\": \"user@example.com\",\n    \"pass\": \"password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/forgot/password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"forgot",
+								"password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"code\": \"123456\",\n    \"newPassword\": \"newpass\",\n    \"emailToken\": \"token\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/reset/password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"reset",
+								"password"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "List All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/adm/list/all/:admEmail",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"adm",
+								"list",
+								"all",
+								":admEmail"
+							],
+							"variable": [
+								{
+									"key": "admEmail",
+									"value": "admin@example.com"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deactivate User",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"admEmail\": \"admin@example.com\",\n    \"email\": \"user@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/adm/deactivate/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"adm",
+								"deactivate",
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User / Reference Person",
+			"item": [
+				{
+					"name": "Create Reference Person",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"John Doe\",\n    \"birthDate\": \"01/01/1990\",\n    \"biologicalGender\": \"Male\",\n    \"whoIsObservingId\": \"userId\",\n    \"cpf\": \"12345678900\",\n    \"socialName\": \"John\",\n    \"motherName\": \"Jane\",\n    \"diagnosis\": \"None\",\n    \"rgNumber\": \"12345\",\n    \"rgUf\": \"SP\",\n    \"rgIssue\": \"SSP\",\n    \"rgDateIssue\": \"01/01/2010\",\n    \"isShelter\": false,\n    \"localLocalization\": \"Home\",\n    \"adress\": \"Street 1\",\n    \"neighborhood\": \"Downtown\",\n    \"adressNumber\": \"10\",\n    \"adressComplement\": \"Apt 1\",\n    \"state\": \"SP\",\n    \"city\": \"Sao Paulo\",\n    \"phone\": \"11999999999\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/create/reference/person",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"create",
+								"reference",
+								"person"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Reference Person By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/list/reference/person/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"list",
+								"reference",
+								"person",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+                {
+					"name": "Create Family Person",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullname\": \"Child Doe\",\n    \"birthDate\": \"01/01/2015\",\n    \"biologicalGender\": \"Female\",\n    \"kinship\": \"Daughter\",\n    \"personWithDisabilities\": false,\n    \"familyPersonId\": \"refPersonId\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/create/family/person",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"create",
+								"family",
+								"person"
+							]
+						}
+					},
+					"response": []
+				},
+                {
+					"name": "Create User (Manager)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"admEmail\": \"admin@example.com\",\n    \"email\": \"newuser@example.com\",\n    \"fullName\": \"Worker Name\",\n    \"crm\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/create/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"create",
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

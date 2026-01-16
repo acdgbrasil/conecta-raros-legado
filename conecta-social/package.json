@@ -1,0 +1,43 @@
+{
+  "name": "project-amn",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx swc src -d build",
+    "dev": "npx nodemon",
+    "start": "node build/src/index.js",
+    "start_server_watch": "pm2 start npx --name conecta-raros-v1 -- ts-node src/index.ts",
+    "docker_init": "npx prisma migrate deploy && npm run build && npx prisma generate && npm run start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@swc/cli": "^0.7.7",
+    "@swc/core": "^1.12.7",
+    "@types/cors": "^2.8.19",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^25.0.9",
+    "@types/pg": "^8.15.4",
+    "esbuild": "^0.27.2",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^8.1.3",
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^5.0.6",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.1.3",
+    "multer": "^2.0.2",
+    "pg": "^8.16.2",
+    "resend": "^6.7.0"
+  }
+}
