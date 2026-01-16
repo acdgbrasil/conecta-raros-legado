@@ -7,7 +7,21 @@ const admRouter = Router();
 
 const admController = new AdmController()
 
-admRouter.get('/adm/list/all/:admEmail',async (req,res)=>{
+/**
+ * @swagger
+ * /adm/users:
+ *   get:
+ *     summary: Lista todos os usuários (Requer Super Admin)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de usuários retornada com sucesso
+ *       401:
+ *         description: Não autorizado (Não é Super Admin)
+ */
+admRouter.get('/adm/users',async (req,res)=>{
     try{
         // SECURE AUTH CHECK
         // 1. Get User ID from Token (set by verifyToken middleware)
@@ -38,6 +52,34 @@ admRouter.get('/adm/list/all/:admEmail',async (req,res)=>{
     }
 })
 
+/**
+ * @swagger
+ * /adm/deactivate/user:
+ *   patch:
+ *     summary: Desativa um usuário (Requer Super Admin)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Email do usuário a ser desativado
+ *     responses:
+ *       200:
+ *         description: Usuário desativado com sucesso
+ *       401:
+ *         description: Não autorizado
+ *       404:
+ *         description: Usuário não encontrado
+ */
 admRouter.patch('/adm/deactivate/user',async(req,res)=>{
     try{
         const {email} = req.body // Removed admEmail from body reliance

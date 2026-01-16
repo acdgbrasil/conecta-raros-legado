@@ -1,5 +1,5 @@
 import { FamilyComunitaryConvivation } from "./familyComunitaryConvivation.js";
-import { HelphyConditionFamily } from "./familyHelphyCondition.js";
+import { HealthyConditionFamily } from "./familyHealthyCondition.js";
 import { FamilyHistorySocioEducation } from "./familyHistorySocioEducation.js";
 import { FamilyInstitucionalHistory } from "./familyInstitucionalHistory.js";
 import { Observations } from "./observations.js";
@@ -105,7 +105,7 @@ export class FamilyCompositionPerson{
     workConditionPerson?: WorkConditionPerson;
     pregnant?:Pregnant;
     participationAndSocialServices?:ParticipationAndSocialServices;
-    helphyConditionFamily?:HelphyConditionFamily;
+    healthyConditionFamily?:HealthyConditionFamily;
     familyComunitaryConvivation?:FamilyComunitaryConvivation;
     familyHistorySocioEducation?:FamilyHistorySocioEducation;
     familyInstitutionalHistory?:FamilyInstitucionalHistory;

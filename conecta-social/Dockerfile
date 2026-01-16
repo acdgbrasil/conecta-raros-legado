@@ -1,32 +1,32 @@
 # Stage 1: Build
-FROM node:20-alpine AS builder
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
 # Install dependencies
-COPY package*.json ./
-RUN npm ci
+COPY package.json ./
+# Bun usa bun.lockb, mas se não tiver, ele gera. Se tiver package-lock, ele ignora ou converte.
+# Como estamos mudando, vamos garantir que instale as deps.
+RUN bun install
 
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build the application (opcional com Bun, pois ele roda TS direto, mas mantemos para prod)
+# Se o build usar SWC/TSC, ainda funciona. Mas com Bun podemos rodar direto.
+# Vamos manter o build step padrão caso queira gerar JS puro para prod.
+RUN bun run build
 
 # Stage 2: Production
-FROM node:20-alpine
+FROM oven/bun:1-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --only=production
+COPY package.json ./
+RUN bun install --production
 
 COPY --from=builder /app/build ./build
-# We also need the .env file if not provided strictly by docker-compose environment mapping, 
-# but docker-compose usually handles the env vars. 
-# Copying static assets if they are needed by path resolution relative to root
-# (Though the code seems to look relative to __filename which is in build/)
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["bun", "start"]

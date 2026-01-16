@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Documents, EducationConditionPerson, FamilyComposition, FamilyCompositionPerson, OcurruncyBolsaFamilia, ParticipationAndSocialServices, Pregnant, WorkConditionPerson } from "../../../../domain/entity/familyComposition.js";
 import { observation } from "./observationModel.js";
-import { HelphyConditionFamily } from "../../../../domain/entity/familyHelphyCondition.js";
+import { HealthyConditionFamily } from "../../../../domain/entity/familyHealthyCondition.js";
 import { FamilyComunitaryConvivation } from "../../../../domain/entity/familyComunitaryConvivation.js";
 import { FamilyHistorySocioEducation } from "../../../../domain/entity/familyHistorySocioEducation.js";
 import { FamilyInstitucionalHistory } from "../../../../domain/entity/familyInstitucionalHistory.js";
@@ -102,8 +102,8 @@ const workConditionPerson = new mongoose.Schema<WorkConditionPerson>({
     }
 })
 
-const HelphyConditionFamilyPerson = new mongoose.Schema<HelphyConditionFamily>({
-  helphyNeeds:{
+const HealthyConditionFamilyPerson = new mongoose.Schema<HealthyConditionFamily>({
+  healthyNeeds:{
         type:Boolean,
     },
     typeOfDeficiency:{
@@ -203,8 +203,8 @@ const familyCompositionPerson = new mongoose.Schema<FamilyCompositionPerson>({
     pregnant:{
         type:pregnant
     },
-    helphyConditionFamily:{
-        type:HelphyConditionFamilyPerson
+    healthyConditionFamily:{
+        type:HealthyConditionFamilyPerson
     },
     familyComunitaryConvivation:{
         type:familyComunitaryConvivationPerson

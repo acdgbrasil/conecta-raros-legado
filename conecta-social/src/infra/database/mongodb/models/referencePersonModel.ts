@@ -95,9 +95,9 @@ const referencePerson = new mongoose.Schema<ReferencePerson>({
         type:Schema.Types.ObjectId,
         ref:'familySituationViolence'
     },
-    helphyConditionId:{
+    healthyConditionId:{
         type:Schema.Types.ObjectId,
-        ref:'helphyCondition'
+        ref:'healthyCondition'
     },
     eventlyBenefitId:{
         type:Schema.Types.ObjectId,

@@ -140,22 +140,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/adm/list/all/:admEmail",
+							"raw": "{{baseUrl}}/api/adm/users",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"adm",
-								"list",
-								"all",
-								":admEmail"
-							],
-							"variable": [
-								{
-									"key": "admEmail",
-									"value": "admin@example.com"
-								}
+								"users"
 							]
 						}
 					},
@@ -174,7 +166,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"admEmail\": \"admin@example.com\",\n    \"email\": \"user@example.com\"\n}",
+							"raw": "{\n    \"email\": \"user@example.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -199,7 +191,7 @@
 			]
 		},
 		{
-			"name": "User / Reference Person",
+			"name": "Reference Person",
 			"item": [
 				{
 					"name": "Create Reference Person",
@@ -214,7 +206,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"fullName\": \"John Doe\",\n    \"birthDate\": \"01/01/1990\",\n    \"biologicalGender\": \"Male\",\n    \"whoIsObservingId\": \"userId\",\n    \"cpf\": \"12345678900\",\n    \"socialName\": \"John\",\n    \"motherName\": \"Jane\",\n    \"diagnosis\": \"None\",\n    \"rgNumber\": \"12345\",\n    \"rgUf\": \"SP\",\n    \"rgIssue\": \"SSP\",\n    \"rgDateIssue\": \"01/01/2010\",\n    \"isShelter\": false,\n    \"localLocalization\": \"Home\",\n    \"adress\": \"Street 1\",\n    \"neighborhood\": \"Downtown\",\n    \"adressNumber\": \"10\",\n    \"adressComplement\": \"Apt 1\",\n    \"state\": \"SP\",\n    \"city\": \"Sao Paulo\",\n    \"phone\": \"11999999999\"\n}",
+							"raw": "{\n    \"fullName\": \"John Doe\",\n    \"birthDate\": \"01/01/1990\",\n    \"biologicalGender\": \"Masculino\",\n    \"whoIsObservingId\": \"userId\",\n    \"cpf\": \"12345678900\",\n    \"socialName\": \"John\",\n    \"motherName\": \"Jane\",\n    \"diagnosis\": \"None\",\n    \"rgNumber\": \"12345\",\n    \"rgUf\": \"SP\",\n    \"rgIssue\": \"SSP\",\n    \"rgDateIssue\": \"01/01/2010\",\n    \"isShelter\": false,\n    \"localLocalization\": \"URBAN\",\n    \"address\": \"Street 1\",\n    \"neighborhood\": \"Downtown\",\n    \"addressNumber\": \"10\",\n    \"addressComplement\": \"Apt 1\",\n    \"state\": \"SP\",\n    \"city\": \"Sao Paulo\",\n    \"phone\": \"11999999999\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -222,21 +214,19 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/create/reference/person",
+							"raw": "{{baseUrl}}/reference-persons",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"create",
-								"reference",
-								"person"
+								"reference-persons"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "List Reference Person By ID",
+					"name": "List All Reference Persons",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -247,14 +237,35 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/list/reference/person/:id",
+							"raw": "{{baseUrl}}/reference-persons",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"list",
-								"reference",
-								"person",
+								"reference-persons"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Reference Person By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/reference-persons/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reference-persons",
 								":id"
 							],
 							"variable": [
@@ -267,10 +278,10 @@
 					},
 					"response": []
 				},
-                {
-					"name": "Create Family Person",
+				{
+					"name": "Get Reference Person Details",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
@@ -278,31 +289,28 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"fullname\": \"Child Doe\",\n    \"birthDate\": \"01/01/2015\",\n    \"biologicalGender\": \"Female\",\n    \"kinship\": \"Daughter\",\n    \"personWithDisabilities\": false,\n    \"familyPersonId\": \"refPersonId\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "{{baseUrl}}/create/family/person",
+							"raw": "{{baseUrl}}/reference-persons/:id/details",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"create",
-								"family",
-								"person"
+								"reference-persons",
+								":id",
+								"details"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "123"
+								}
 							]
 						}
 					},
 					"response": []
 				},
-                {
-					"name": "Create User (Manager)",
+				{
+					"name": "Add Observation",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -314,7 +322,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"admEmail\": \"admin@example.com\",\n    \"email\": \"newuser@example.com\",\n    \"fullName\": \"Worker Name\",\n    \"crm\": \"123456\"\n}",
+							"raw": "{\n    \"observation\": \"Observation text\",\n    \"whoIsObservingId\": \"userId\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -322,13 +330,427 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/create/user",
+							"raw": "{{baseUrl}}/reference-persons/:id/observations",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"create",
-								"user"
+								"reference-persons",
+								":id",
+								"observations"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "123"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Family",
+			"item": [
+				{
+					"name": "Add Member",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullname\": \"Child Name\",\n    \"birthDate\": \"01/01/2010\",\n    \"biologicalGender\": \"Female\",\n    \"kinship\": 1,\n    \"personWithDisabilities\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/families/:familyId/members",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"families",
+								":familyId",
+								"members"
+							],
+							"variable": [
+								{
+									"key": "familyId",
+									"value": "123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Members",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/families/:familyId/members",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"families",
+								":familyId",
+								"members"
+							],
+							"variable": [
+								{
+									"key": "familyId",
+									"value": "123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Documents",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"document\": [true, true, false, false, false]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/families/:familyId/members/:memberId/documents",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"families",
+								":familyId",
+								"members",
+								":memberId",
+								"documents"
+							],
+							"variable": [
+								{
+									"key": "familyId",
+									"value": "123"
+								},
+								{
+									"key": "memberId",
+									"value": "456"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Ethnicity",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ethnicalSpecifications\": \"Indigenous\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/families/:familyId/ethnicity",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"families",
+								":familyId",
+								"ethnicity"
+							],
+							"variable": [
+								{
+									"key": "familyId",
+									"value": "123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Community Ties",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"yearsInState\": 10,\n    \"hasNearbySupportNetwork\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/families/:familyId/community-ties",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"families",
+								":familyId",
+								"community-ties"
+							],
+							"variable": [
+								{
+									"key": "familyId",
+									"value": "123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Community Convivence",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dateOfInitJson\": \"2023-01-01\",\n    \"dateOfFinishJson\": \"2023-12-31\",\n    \"unity\": 1,\n    \"serviceType\": 2,\n    \"familyCompositionId\": \"fam123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/members/:memberId/community-convivence",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"members",
+								":memberId",
+								"community-convivence"
+							],
+							"variable": [
+								{
+									"key": "memberId",
+									"value": "456"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Conditions",
+			"item": [
+				{
+					"name": "Update Home Conditions",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"typeResidence\": \"House\",\n    \"numberOfRooms\": 4,\n    \"hasAcessEnergy\": \"Yes\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/families/:familyId/home-conditions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"families",
+								":familyId",
+								"home-conditions"
+							],
+							"variable": [
+								{
+									"key": "familyId",
+									"value": "123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Work Conditions",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"hasSocialIncome\": true,\n    \"familyCompositionID\": \"fam123\",\n    \"workConditionId\": \"work123\",\n    \"workConditionBody\": \"Unemployed\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/members/:memberId/work-conditions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"members",
+								":memberId",
+								"work-conditions"
+							],
+							"variable": [
+								{
+									"key": "memberId",
+									"value": "456"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Health Conditions",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"healthyConditionId\": \"health123\",\n    \"familyCompositionID\": \"fam123\",\n    \"hasHealthyNeeds\": true,\n    \"typeOfDeficiency\": \"Physical\",\n    \"hasFamilyMemberSevereIllness\": false,\n    \"hasFamilyMemberSevereIllnessList\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/members/:memberId/health-conditions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"members",
+								":memberId",
+								"health-conditions"
+							],
+							"variable": [
+								{
+									"key": "memberId",
+									"value": "456"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Education",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"familyCompositionID\": \"fam123\",\n    \"literaty\": true,\n    \"isStudying\": true,\n    \"schoolShip\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/members/:memberId/education",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"members",
+								":memberId",
+								"education"
+							],
+							"variable": [
+								{
+									"key": "memberId",
+									"value": "456"
+								}
 							]
 						}
 					},

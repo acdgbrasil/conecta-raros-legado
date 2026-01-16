@@ -10,7 +10,7 @@ import { FamilyHistoryInstitutionalCompletModel } from "../models/familyHistoryI
 import { familyHistoryOfComplianceSocioEducationalMeasuresModel } from "../models/familyHistoryOfComplianceSocioEducationalMeasuresModel.js";
 import { familySituationViolenceModel } from "../models/familySituationViolenceModel.js";
 import { firstEntryInUnityModel } from "../models/firstEntryInUnityModel.js";
-import { helphyConditionModel } from "../models/helphyConditionModel.js";
+import { healthyConditionModel } from "../models/healthyConditionModel.js";
 import { homeConditionsModel } from "../models/homeConditionsModel.js";
 import { referencePersonModel } from "../models/referencePersonModel.js";
 import { WorkConditionModel } from "../models/workConditionModel.js";
@@ -41,7 +41,7 @@ export const createReferencePersonObservation = async (observations:Observations
             throw new CustomError('REFERENCE_PERSON_NOT_FOUND',404,'REFERENCE_PERSON_NOT_FOUND','Reference Person not found');
         }
 
-        getReferencePerson.observations?.push(observations);
+        (getReferencePerson as any).observations?.push(observations);
         await getReferencePerson.save();
         return getReferencePerson;
     } catch (error) {
@@ -67,16 +67,16 @@ export const createReferencePerson = async (rp:ReferencePerson)=>{
         familyComposition.save()
 
         const fistEntryInUnity = await firstEntryInUnityModel.create({
-            inInUse:false,
+            isInUse:false,
         })
         const homeCondition = await homeConditionsModel.create({
-            inInUse:false,
+            isInUse:false,
         })
         const workCondition = await WorkConditionModel.create({
-            inInUse:false,
+            isInUse:false,
         })
-        const helphyCondition = await helphyConditionModel.create({
-            inInUse:false,
+        const healthyCondition = await healthyConditionModel.create({
+            // Removed isInUse as it is not in the schema
         })
         const eventlyBenefit = await familyEventlyBenefitsModel.create({
             inInUse:false,
@@ -87,7 +87,7 @@ export const createReferencePerson = async (rp:ReferencePerson)=>{
         })
 
         const familyHistoryOfComplienceSocialEducational = await familyHistoryOfComplianceSocioEducationalMeasuresModel.create({
-            inInUse:false,
+            isInUse:false,
         })
 
         const FamilyHistoryInstitutionalComplet = await FamilyHistoryInstitutionalCompletModel.create({
@@ -130,18 +130,18 @@ export const createReferencePerson = async (rp:ReferencePerson)=>{
             rg:rp.rg,
             state:rp.state,
             whoIsOpeningId:rp.whoIsOpeningId,
-            fistEntryInUnityId:fistEntryInUnity.id,
-            familyCompositionId:familyComposition.id,
+            fistEntryInUnityId:(fistEntryInUnity as any).id,
+            familyCompositionId:(familyComposition as any).id,
             birthDate:rp.birthDate,
             biologicalGender:rp.biologicalGender,
-            homeConditionsId:homeCondition.id,
-            workConditionId:workCondition.id,
-            familySituationViolationId:familySituationViolation.id,
-            helphyConditionId:helphyCondition.id,
-            eventlyBenefitId:eventlyBenefit.id,
-            familyAndCommunityId:familyAndCommunity.id,
-            familyHistoryOfComplianceSocialEducationalMensuresId:familyHistoryOfComplienceSocialEducational.id,
-            familyHistoryInstitutionalCompletId:FamilyHistoryInstitutionalComplet.id
+            homeConditionsId:(homeCondition as any).id,
+            workConditionId:(workCondition as any).id,
+            familySituationViolationId:(familySituationViolation as any).id,
+            healthyConditionId:(healthyCondition as any).id,
+            eventlyBenefitId:(eventlyBenefit as any).id,
+            familyAndCommunityId:(familyAndCommunity as any).id,
+            familyHistoryOfComplianceSocialEducationalMensuresId:(familyHistoryOfComplienceSocialEducational as any).id,
+            familyHistoryInstitutionalCompletId:(FamilyHistoryInstitutionalComplet as any).id
         })
         
         return referencePerson

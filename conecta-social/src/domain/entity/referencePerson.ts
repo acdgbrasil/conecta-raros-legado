@@ -33,7 +33,7 @@ export class ReferencePerson {
     familyCompositionId?: string
     homeConditionsId?: string
     fistEntryInUnityId?: FirstEntryInUnity
-    helphyConditionId?: string
+    healthyConditionId?: string
     eventlyBenefitId?: string
     familySituationViolationId?: string
     workConditionId?: string

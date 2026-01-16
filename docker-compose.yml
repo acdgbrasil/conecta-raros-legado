@@ -14,7 +14,7 @@ services:
     networks:
       - conecta-network
 
-  # --- Backend (Node.js) ---
+  # --- Backend (Node.js/Bun) ---
   backend:
     build:
       context: ./conecta-social
@@ -23,6 +23,12 @@ services:
     restart: always
     expose:
       - "3000"
+    # Hot Reload: Mapeia pasta local para container
+    volumes:
+      - ./conecta-social:/app
+      - /app/node_modules
+    # Bun nativo com watch mode
+    command: bun run dev
     env_file:
       - ./conecta-social/.env
     environment:
@@ -35,7 +41,7 @@ services:
     networks:
       - conecta-network
 
-  # --- Frontend (Bun) ---
+  # --- Frontend (Next.js/Bun) ---
   frontend:
     build:
       context: ./conecta-social-front
@@ -44,9 +50,20 @@ services:
     restart: always
     expose:
       - "3000"
+    # Hot Reload: Mapeia pasta local e roda servidor de dev
+    volumes:
+      - ./conecta-social-front:/app
+      - /app/node_modules
+      - /app/.next
+    command: bun run dev
     environment:
-      # Agora a API é acessível na mesma origem (localhost:80)
-      - VITE_API_URL=
+      # Configuração para o apiClient.ts
+      # NEXT_PUBLIC_API_URL: Usada pelo navegador (Client-Side) através do Nginx (localhost:80)
+      - NEXT_PUBLIC_API_URL=http://localhost:80
+      # INTERNAL_API_URL: Usada pelo servidor (SSR) para comunicação interna na rede Docker
+      - INTERNAL_API_URL=http://backend:3000
+      # Otimização para watcher em containers
+      - WATCHPACK_POLLING=true
     depends_on:
       - backend
     networks:
@@ -72,6 +89,7 @@ services:
     image: mongo:6.0
     container_name: conecta-mongo
     restart: always
+    command: ["mongod", "--quiet", "--bind_ip_all"]
     expose:
       - "27017"
     volumes:

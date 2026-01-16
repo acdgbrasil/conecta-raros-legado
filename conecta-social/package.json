@@ -7,8 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx swc src -d build",
-    "dev": "npx nodemon",
-    "start": "node build/src/index.js",
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
     "start_server_watch": "pm2 start npx --name conecta-raros-v1 -- ts-node src/index.ts",
     "docker_init": "npx prisma migrate deploy && npm run build && npx prisma generate && npm run start"
   },
@@ -23,6 +23,8 @@
     "@types/multer": "^2.0.0",
     "@types/node": "^25.0.9",
     "@types/pg": "^8.15.4",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "esbuild": "^0.27.2",
     "typescript": "^5.2.2"
   },
@@ -34,10 +36,13 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^9.1.3",
     "multer": "^2.0.2",
     "pg": "^8.16.2",
-    "resend": "^6.7.0"
+    "resend": "^6.7.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   }
 }

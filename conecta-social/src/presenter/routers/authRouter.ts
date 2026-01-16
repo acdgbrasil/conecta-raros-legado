@@ -1,16 +1,43 @@
 import { Router } from "express";
 import { AuthController } from "../../useCase/controllers/authController.js";
 import { CustomError } from "../../infra/error/error.js";
-import { UserController } from "../../useCase/controllers/userController.js";
+import { UserManagementController } from "../../useCase/controllers/modules/userManagementController.js";
 import { User, UserRole } from "../../domain/entity/user.js";
-import { createPassEmailToken, createToken } from "../../infra/jwt/jwtToken.js";
-import { FIVE_MINUTES } from "../../infra/database/mongodb/mongoModels.js";
 
 
 const authRouter = Router();
 const authController = new AuthController();
-const userController = new UserController();
+const userController = new UserManagementController();
 
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Registra um novo usuário
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - pass
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               pass:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Usuário criado com sucesso
+ *       400:
+ *         description: Dados inválidos
+ */
 authRouter.post('/auth/register', async (req, res) => {
     try{
         const {name,email,pass} = req.body;
@@ -39,13 +66,39 @@ authRouter.post('/auth/register', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Realiza login
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login realizado com sucesso
+ *       400:
+ *         description: Credenciais inválidas
+ */
 authRouter.post('/auth/login', async (req, res) => {
     try{
-        const {email,pass} = req.body;
+        const {email,password} = req.body;
         if(!email) throw new CustomError('Bad Request',400,'Bad Request','Email is required');
-        if(!pass) throw new CustomError('Bad Request',400,'Bad Request','Password is required');
+        if(!password) throw new CustomError('Bad Request',400,'Bad Request','Password is required');
         const authController = new AuthController();
-        const response = await authController.login(email,pass);
+        const response = await authController.login(email,password);
         return res.status(200).json(response);
     }catch(e){
         if(e instanceof CustomError){
@@ -58,6 +111,31 @@ authRouter.post('/auth/login', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /auth/forgot/password:
+ *   post:
+ *     summary: Solicita recuperação de senha
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Código enviado com sucesso
+ *       400:
+ *         description: Email inválido
+ *       404:
+ *         description: Usuário não encontrado
+ */
 authRouter.post('/auth/forgot/password', async (req, res) => {
     try{
         const {email} = req.body;
@@ -73,6 +151,38 @@ authRouter.post('/auth/forgot/password', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /auth/reset/password:
+ *   post:
+ *     summary: Redefine a senha usando o código recebido
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - code
+ *               - newPassword
+ *               - emailToken
+ *             properties:
+ *               email:
+ *                 type: string
+ *               code:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *               emailToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Senha alterada com sucesso
+ *       400:
+ *         description: Dados inválidos ou token expirado
+ */
 authRouter.post('/auth/reset/password', async (req, res) => {
     try{
         const {email,code,newPassword,emailToken} = req.body;

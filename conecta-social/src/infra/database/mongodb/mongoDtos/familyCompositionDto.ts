@@ -4,7 +4,7 @@ import { Observations } from "../../../../domain/entity/observations.js";
 import { CustomError } from "../../../error/error.js";
 import { familyCompositionModel } from "../models/familyCompositionModel.js";
 import { WorkCondition } from "../../../../domain/entity/workCondition.js";
-import { HelphyConditionFamily } from "../../../../domain/entity/familyHelphyCondition.js";
+import { HealthyConditionFamily } from "../../../../domain/entity/familyHealthyCondition.js";
 import { FamilyComunitaryConvivation } from "../../../../domain/entity/familyComunitaryConvivation.js";
 import { FamilyHistorySocioEducation } from "../../../../domain/entity/familyHistorySocioEducation.js";
 import { FamilyInstitucionalHistory } from "../../../../domain/entity/familyInstitucionalHistory.js";
@@ -57,13 +57,13 @@ export const createFamilyEducationCondition = async (educationCondition:Educatio
     }
 }
 
-export const familyHelphyConditionDto = async (familyHelphyCondition:HelphyConditionFamily,familyCompositionID:string,id:string) => {
+export const familyHealthyConditionDto = async (familyHealthyCondition:HealthyConditionFamily,familyCompositionID:string,id:string) => {
     try {
         const familyComposition = await familyCompositionModel.findById(familyCompositionID)
         if(!familyComposition) throw new CustomError('FAMILY_COMPOSITION_NOT_FOUND',404,'FAMILY_COMPOSITION_NOT_FOUND','Family Composition not found')
         const familyCompositionPerson = familyComposition.familyCompositionPerson.find((person:any) => person._id == id)
         if(!familyCompositionPerson) throw new CustomError('FAMILY_COMPOSITION_PERSON_NOT_FOUND',404,'FAMILY_COMPOSITION_PERSON_NOT_FOUND','Family Composition Person not found')
-        familyCompositionPerson.helphyConditionFamily = familyHelphyCondition
+        familyCompositionPerson.healthyConditionFamily = familyHealthyCondition
         familyComposition.isInUse = true
         familyComposition.save()
         return familyComposition

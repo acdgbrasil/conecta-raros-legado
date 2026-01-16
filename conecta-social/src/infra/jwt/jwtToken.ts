@@ -1,7 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { CustomError } from '../error/error.js';
-import { JWT_EMAIL_KEY, JWT_PASS_KEY } from './config/jwtKeys.js';
 
 /**
  * Creates a JWT token with the given payload and expiration time.
@@ -10,16 +9,16 @@ import { JWT_EMAIL_KEY, JWT_PASS_KEY } from './config/jwtKeys.js';
  * @returns The generated JWT token.
  */
 export function createToken(payload:string,timer:number):string{
-    return jwt.sign({"pay":payload},JWT_PASS_KEY,{expiresIn:timer})
+    return jwt.sign({"pay":payload},process.env.JWT_PASS_KEY!,{expiresIn:timer})
 }
 
 export function createPassEmailToken(payload:string,timer:number):string{
-    return jwt.sign({"pay":payload},JWT_EMAIL_KEY,{expiresIn:timer})
+    return jwt.sign({"pay":payload},process.env.JWT_EMAIL_KEY!,{expiresIn:timer})
 }
 
 export function _verifyPassEmailToken(token:string):Map<string,Error | boolean | string | undefined | jwt.JwtPayload>{
     let result = new Map<string,Error | boolean | string | undefined | jwt.JwtPayload>()
-    jwt.verify(token,JWT_EMAIL_KEY,function (err,decode){
+    jwt.verify(token,process.env.JWT_EMAIL_KEY!,function (err,decode){
         if(err){
             result.set("hasError",true)
             result.set("value",err)
@@ -33,7 +32,7 @@ export function _verifyPassEmailToken(token:string):Map<string,Error | boolean |
 
 function _verifyToken(token:string):Map<string,Error | boolean | string | undefined | jwt.JwtPayload>{
     let result = new Map<string,Error | boolean | string | undefined | jwt.JwtPayload>()
-    jwt.verify(token,JWT_PASS_KEY,function (err,decode){
+    jwt.verify(token,process.env.JWT_PASS_KEY!,function (err,decode){
         if(err){
             result.set("hasError",true)
             result.set("value",err)

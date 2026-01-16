@@ -11,16 +11,16 @@ import { createReferencePerson, createReferencePersonObservation, getByIdReferen
 import { FirstEntryInUnity } from '../../domain/entity/firstEntryInUnity.js';
 import { createFirstEntryInUnity, createFirstEntryInUnityObservation, getFirstEntryInUnity } from './mongodb/mongoDtos/firstEntryInUnityDTO.js';
 import { FamilyCompositionPerson, FamilyComposition, Documents, WorkConditionPerson, EducationConditionPerson, Pregnant } from '../../domain/entity/familyComposition.js';
-import { createDocuments, createEtnicalEspecifications, createFamilyCompositionObservation, createFamilyComunitaryConvivationPersonDTO, createFamilyEducationCondition, createFamilyHistorySocioEducationPersonDto, createFamilyPerson, createPregnant, createSocialEspecifications, familyHelphyConditionDto, familyHistoryIntitutionalPersonDto, getFamilyCompositonPersonsDto, getInformationOfPersonAndAgeAreInSchool, insertLaOrPSCInformationDto } from './mongodb/mongoDtos/familyCompositionDto.js';
+import { createDocuments, createEtnicalEspecifications, createFamilyCompositionObservation, createFamilyComunitaryConvivationPersonDTO, createFamilyEducationCondition, createFamilyHistorySocioEducationPersonDto, createFamilyPerson, createPregnant, createSocialEspecifications, familyHealthyConditionDto, familyHistoryIntitutionalPersonDto, getFamilyCompositonPersonsDto, getInformationOfPersonAndAgeAreInSchool, insertLaOrPSCInformationDto } from './mongodb/mongoDtos/familyCompositionDto.js';
 import { HomeConditions } from '../../domain/entity/homeConditions.js';
 import { createHomeConditionsdDTO, createHomeConditionsObservation } from './mongodb/mongoDtos/homeConditionsModelDTO.js';
 import { WorkCondition } from '../../domain/entity/workCondition.js';
 import { createWorkConditionPersonDto, workConditionObservation } from './mongodb/mongoDtos/workConditionDto.js';
 import { FamilySituationViolation } from '../../domain/entity/familySituationViolation.js';
 import { familySituationViolenceDTO, familySituationViolenceObservation } from './mongodb/mongoDtos/familySituationViolenceDTO.js';
-import { HelphyConditionFamily } from '../../domain/entity/familyHelphyCondition.js';
-import { HelphyCondition } from '../../domain/entity/healthCondition.js';
-import { createHelphyConditionDto, createHelphyConditionObsertionDto } from './mongodb/mongoDtos/helphConditionDto.js';
+import { HealthyConditionFamily } from '../../domain/entity/familyHealthyCondition.js';
+import { HealthyCondition } from '../../domain/entity/healthCondition.js';
+import { createHealthConditionDto, createHealthConditionObsertionDto } from './mongodb/mongoDtos/healthConditionDto.js';
 import { FamilyEventlyBenefits } from '../../domain/entity/familyEnvetlyBenefits.js';
 import { createFamilyEventlyBenefitsDto, createFamilyEventlyBenefitsObservationDto } from './mongodb/mongoDtos/familyEventlyBenefitsDto.js';
 import { FamilyAndCommunity } from '../../domain/entity/familyAndCommunity.js';
@@ -117,20 +117,20 @@ export class DatabaseService implements UserRepository, AuthRepository,AdmReposi
             throw e;
         }
     }
-    createHelphyConditionObservation(helphyConditionId: string, observation: Observations): Promise<HelphyCondition> {
+    createHealthConditionObservation(healthConditionId: string, observation: Observations): Promise<HealthyCondition> {
         try{
-            const helphyCondition = createHelphyConditionObsertionDto(helphyConditionId, observation);
-            return helphyCondition;
+            const healthyCondition = createHealthConditionObsertionDto(healthConditionId, observation);
+            return healthyCondition;
         }catch(e){
             throw e;
         }
     }
-    async createHelphyCondition(HelphyCondition: HelphyCondition, helphyConditionId: string, familyHelphyCondition: HelphyConditionFamily, familyCompositionID: string, personId: string,pregnant:Pregnant): Promise<HelphyCondition> {
+    async createHealthCondition(HealthyCondition: HealthyCondition, healthConditionId: string, familyHealthyCondition: HealthyConditionFamily, familyCompositionID: string, personId: string,pregnant:Pregnant): Promise<HealthyCondition> {
         try{
-            const helphyCondition = await createHelphyConditionDto(HelphyCondition,helphyConditionId);
-            const _ = await familyHelphyConditionDto(familyHelphyCondition, familyCompositionID, personId);
+            const healthyCondition = await createHealthConditionDto(HealthyCondition,healthConditionId);
+            const _ = await familyHealthyConditionDto(familyHealthyCondition, familyCompositionID, personId);
             const __ = await createPregnant(pregnant,familyCompositionID,personId);
-            return helphyCondition;
+            return healthyCondition;
         }catch(e){
             throw e;
         }
@@ -280,7 +280,7 @@ export class DatabaseService implements UserRepository, AuthRepository,AdmReposi
             if(!referencePerson){
                 return new CustomError('REFERENCE_PERSON_NOT_FOUND', 404, 'REFERENCE_PERSON_NOT_FOUND', 'Reference Person not found')
             }
-            return referencePerson
+            return referencePerson as any
         }catch(err){
             throw err
         }
@@ -288,7 +288,7 @@ export class DatabaseService implements UserRepository, AuthRepository,AdmReposi
     async listAllReferencePerson(): Promise<ReferencePerson[]> {
         try {
             const referencePersons = await listAllReferencePerson()
-            return referencePersons
+            return referencePersons as any[]
         } catch (err) {
             throw err
         }
@@ -305,7 +305,7 @@ export class DatabaseService implements UserRepository, AuthRepository,AdmReposi
     async createReferencePerson(referencePerson: ReferencePerson): Promise<ReferencePerson | Error> {
         try {
             const rp = await createReferencePerson(referencePerson)
-            return rp            
+            return rp as any           
         } catch (err) {
             throw err
         }

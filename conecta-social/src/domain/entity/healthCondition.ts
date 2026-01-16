@@ -1,6 +1,6 @@
 import { Observations } from "./observations.js";
 
-export class HelphyConditionStruct{
+export class HealthyConditionStruct{
     fullName: string;
     complement:string;
 
@@ -11,23 +11,23 @@ export class HelphyConditionStruct{
 }
 
 
-export class HelphyCondition{
+export class HealthyCondition{
     hasFamilyMemberNeedsConstantCare:boolean;
-    familyMemberNeedsConstantCareList: HelphyConditionStruct[];
+    familyMemberNeedsConstantCareList: HealthyConditionStruct[];
     hasFamilyIndicatesFoodInsecurity: boolean;
     hasSevereIllness: boolean;
-    severeIllnessList: HelphyConditionStruct[];
+    severeIllnessList: HealthyConditionStruct[];
     hasFamilyMemberUsesControlledMedication: boolean;
-    familyMemberUsesControlledMedicationList: HelphyConditionStruct[];
+    familyMemberUsesControlledMedicationList: HealthyConditionStruct[];
     hasFamilyMemberAbusesAlcohol:boolean;
-    familyMemberAbusesAlcoholList: HelphyConditionStruct[];
+    familyMemberAbusesAlcoholList: HealthyConditionStruct[];
     hasFamilyMemberAbusesDrugs:boolean;
-    familyMemberAbusesDrugsList: HelphyConditionStruct[];
+    familyMemberAbusesDrugsList: HealthyConditionStruct[];
     observations?: Observations[];
     createdAt: Date;
     updatedAt: Date;
 
-    constructor(hasFamilyMemberNeedsConstantCare:boolean, familyMemberNeedsConstantCareList: HelphyConditionStruct[], hasFamilyIndicatesFoodInsecurity: boolean, hasSevereIllness: boolean, severeIllnessList: HelphyConditionStruct[], hasFamilyMemberUsesControlledMedication: boolean, familyMemberUsesControlledMedicationList: HelphyConditionStruct[], hasFamilyMemberAbusesAlcohol:boolean, familyMemberAbusesAlcoholList: HelphyConditionStruct[], hasFamilyMemberAbusesDrugs:boolean, familyMemberAbusesDrugsList: HelphyConditionStruct[], createdAt: Date, updatedAt: Date){
+    constructor(hasFamilyMemberNeedsConstantCare:boolean, familyMemberNeedsConstantCareList: HealthyConditionStruct[], hasFamilyIndicatesFoodInsecurity: boolean, hasSevereIllness: boolean, severeIllnessList: HealthyConditionStruct[], hasFamilyMemberUsesControlledMedication: boolean, familyMemberUsesControlledMedicationList: HealthyConditionStruct[], hasFamilyMemberAbusesAlcohol:boolean, familyMemberAbusesAlcoholList: HealthyConditionStruct[], hasFamilyMemberAbusesDrugs:boolean, familyMemberAbusesDrugsList: HealthyConditionStruct[], createdAt: Date, updatedAt: Date){
         this.hasFamilyMemberNeedsConstantCare = hasFamilyMemberNeedsConstantCare;
         this.familyMemberNeedsConstantCareList = familyMemberNeedsConstantCareList;
         this.hasFamilyIndicatesFoodInsecurity = hasFamilyIndicatesFoodInsecurity;
