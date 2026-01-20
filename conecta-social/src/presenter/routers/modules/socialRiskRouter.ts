@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Hono } from 'hono';
 import { SocialRiskController } from '../../../useCase/controllers/modules/socialRiskController.js';
 import { CustomError } from '../../../infra/error/error.js';
 import { FamilySituationViolation, FamilySituationViolationStruct, FamilySituationViolationStructOther } from '../../../domain/entity/familySituationViolation.js';
@@ -7,7 +7,7 @@ import { FamilyHistorySocioEducation } from '../../../domain/entity/familyHistor
 import { FamilyHistoryInstitutionalComplet, otherFamilySeparationSituationsStruct } from '../../../domain/entity/familyHistoryInstitutionalComplet.js';
 import { FamilyInstitucionalHistory } from '../../../domain/entity/familyInstitucionalHistory.js';
 
-const router = Router();
+const router = new Hono();
 const controller = new SocialRiskController();
 
 // Violence
@@ -58,9 +58,9 @@ const controller = new SocialRiskController();
  *       201:
  *         description: Situação criada
  */
-router.post('/create/violence/situation', async (req, res) => {
+router.post('/create/violence/situation', async (c) => {
     try {
-        const { childLabel, childLabelOcurrentNow, sexualExploitation, sexualExploitationOcurrentNow, sexualAbuse, sexualAbuseNow, physicalAbuse, physicalAbuseNow, psychologicalAbuse, psychologicalAbuseNow, elderNeglect, elderNeglectNow, childNeglect, childNeglectNow, pcdNeglect, pcdNeglectNow, homelessSituation, homelessSituationNow, humanTrafficking, humanTraffickingNow, violenceWithElderOrPcd, violenceWithElderOrPcdNow, otherName, otherNow, otherBool, violenceId } = req.body;
+        const { childLabel, childLabelOcurrentNow, sexualExploitation, sexualExploitationOcurrentNow, sexualAbuse, sexualAbuseNow, physicalAbuse, physicalAbuseNow, psychologicalAbuse, psychologicalAbuseNow, elderNeglect, elderNeglectNow, childNeglect, childNeglectNow, pcdNeglect, pcdNeglectNow, homelessSituation, homelessSituationNow, humanTrafficking, humanTraffickingNow, violenceWithElderOrPcd, violenceWithElderOrPcdNow, otherName, otherNow, otherBool, violenceId } = await c.req.json();
 
         if (!violenceId) throw new CustomError('Bad Request', 400, 'Bad Request', 'Id is required');
 
@@ -81,9 +81,9 @@ router.post('/create/violence/situation', async (req, res) => {
         );
 
         const result = await controller.createViolenceSituation(violation, violenceId);
-        return res.status(201).json(result);
+        return c.json(result, 201);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -113,14 +113,14 @@ router.post('/create/violence/situation', async (req, res) => {
  *       201:
  *         description: Observação adicionada
  */
-router.post('/create/violence/situation/observation', async (req, res) => {
+router.post('/create/violence/situation/observation', async (c) => {
     try {
-        const { familySituationViolationId, observationText, whoIsObservingId } = req.body;
+        const { familySituationViolationId, observationText, whoIsObservingId } = await c.req.json();
         const newObs = new Observations(observationText, whoIsObservingId);
         const result = await controller.addViolenceObservation(familySituationViolationId, newObs);
-        return res.status(201).json(result);
+        return c.json(result, 201);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -153,9 +153,9 @@ router.post('/create/violence/situation/observation', async (req, res) => {
  *       201:
  *         description: Histórico criado
  */
-router.post('/create/history/socio/educational/measures', async (req, res) => {
+router.post('/create/history/socio/educational/measures', async (c) => {
     try {
-        const { laOrPSCInfomation, dateInitJson, dateOfFinishJson, numberOfProcess, type, createFamilyHistoryOfComplianseSocioEducationalMensureId, familyCompositionId, personId, anotationsOfPersons } = req.body;
+        const { laOrPSCInfomation, dateInitJson, dateOfFinishJson, numberOfProcess, type, createFamilyHistoryOfComplianseSocioEducationalMensureId, familyCompositionId, personId, anotationsOfPersons } = await c.req.json();
 
         const history = new FamilyHistorySocioEducation(
             new Date(dateInitJson), new Date(dateOfFinishJson), numberOfProcess, type, true
@@ -164,9 +164,9 @@ router.post('/create/history/socio/educational/measures', async (req, res) => {
         const result = await controller.createSocioEducational(
             laOrPSCInfomation, createFamilyHistoryOfComplianseSocioEducationalMensureId, history, familyCompositionId, personId, anotationsOfPersons
         );
-        return res.status(201).json(result);
+        return c.json(result, 201);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -196,14 +196,14 @@ router.post('/create/history/socio/educational/measures', async (req, res) => {
  *       201:
  *         description: Observação adicionada
  */
-router.post('/create/history/socio/educational/measures/observations', async (req, res) => {
+router.post('/create/history/socio/educational/measures/observations', async (c) => {
     try {
-        const { familyHistoryOfComplianseSocioEducationalMensureId, observation, whoIsObservingId } = req.body;
+        const { familyHistoryOfComplianseSocioEducationalMensureId, observation, whoIsObservingId } = await c.req.json();
         const newObs = new Observations(observation, whoIsObservingId);
         const result = await controller.addSocioEducationalObservation(familyHistoryOfComplianseSocioEducationalMensureId, newObs);
-        return res.status(201).json(result);
+        return c.json(result, 201);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -237,18 +237,18 @@ router.post('/create/history/socio/educational/measures/observations', async (re
  *       201:
  *         description: Histórico criado
  */
-router.post('/create/family/history/institutional', async (req, res) => {
+router.post('/create/family/history/institutional', async (c) => {
     try {
-        const { familyInstitutionalShelterHistory, childCustodyHistory, hasMemberInPrision, hasMemberInadolescentInSocioEducationalInternment, familyHistoryInstitutionalCompletId, dateInitJson, dateFinishJson, reason, familyCompositionId, personId } = req.body;
+        const { familyInstitutionalShelterHistory, childCustodyHistory, hasMemberInPrision, hasMemberInadolescentInSocioEducationalInternment, familyHistoryInstitutionalCompletId, dateInitJson, dateFinishJson, reason, familyCompositionId, personId } = await c.req.json();
 
         const other = new otherFamilySeparationSituationsStruct(hasMemberInPrision, hasMemberInadolescentInSocioEducationalInternment);
         const complet = new FamilyHistoryInstitutionalComplet(familyInstitutionalShelterHistory, childCustodyHistory, other, true);
         const personHistory = new FamilyInstitucionalHistory(new Date(dateInitJson), new Date(dateFinishJson), reason, true);
 
         const result = await controller.createInstitutionalHistory(complet, familyHistoryInstitutionalCompletId, personHistory, familyCompositionId, personId);
-        return res.status(201).json(result);
+        return c.json(result, 201);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -278,14 +278,14 @@ router.post('/create/family/history/institutional', async (req, res) => {
  *       201:
  *         description: Observação adicionada
  */
-router.post('/create/family/history/institutional/observation', async (req, res) => {
+router.post('/create/family/history/institutional/observation', async (c) => {
     try {
-        const { familyHistoryInstitutionalCompletId, observation, whoIsObservingId } = req.body;
+        const { familyHistoryInstitutionalCompletId, observation, whoIsObservingId } = await c.req.json();
         const newObs = new Observations(observation, whoIsObservingId);
         const result = await controller.addInstitutionalObservation(familyHistoryInstitutionalCompletId, newObs);
-        return res.status(201).json(result);
+        return c.json(result, 201);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 

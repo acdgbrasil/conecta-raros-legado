@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Hono } from 'hono';
 import { FamilyController } from '../../../useCase/controllers/modules/familyController.js';
 import { CustomError } from '../../../infra/error/error.js';
 import { FamilyCompositionPerson, Documents, Pregnant } from '../../../domain/entity/familyComposition.js';
@@ -7,7 +7,7 @@ import { FamilyAndCommunity } from '../../../domain/entity/familyAndCommunity.js
 import { FamilyComunitaryConvivation } from '../../../domain/entity/familyComunitaryConvivation.js';
 import { FamilyEventlyBenefits } from '../../../domain/entity/familyEnvetlyBenefits.js';
 
-const router = Router();
+const router = new Hono();
 const controller = new FamilyController();
 
 // Family Person
@@ -44,10 +44,10 @@ const controller = new FamilyController();
  *     responses:
  *       201: { description: Member Created }
  */
-router.post('/families/:familyId/members', async (req, res) => {
+router.post('/families/:familyId/members', async (c) => {
     try {
-        const { familyId } = req.params;
-        const { fullname, birthDate, biologicalGender, kinship, personWithDisabilities } = req.body;
+        const familyId = c.req.param('familyId');
+        const { fullname, birthDate, biologicalGender, kinship, personWithDisabilities } = await c.req.json();
 
         if (!fullname) throw new CustomError('Bad Request', 400, 'Bad Request', 'Full Name is required');
         if (!birthDate) throw new CustomError('Bad Request', 400, 'Bad Request', 'Birth Date is required');
@@ -57,13 +57,13 @@ router.post('/families/:familyId/members', async (req, res) => {
 
         const documents = new Documents(false, false, false, false, false);
         const dateArray = birthDate.split('/');
-        const date = new Date(dateArray[2], dateArray[1], dateArray[0]);
+        const date = new Date(Number(dateArray[2]), Number(dateArray[1]), Number(dateArray[0]));
         const familyCompositionPerson = new FamilyCompositionPerson(fullname, date, biologicalGender, personWithDisabilities, documents, kinship);
         
         const result = await controller.createFamilyPerson(familyCompositionPerson, familyId);
-        return res.status(201).json(result);
+        return c.json(result, 201);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -83,13 +83,13 @@ router.post('/families/:familyId/members', async (req, res) => {
  *     responses:
  *       200: { description: OK }
  */
-router.get('/families/:familyId/members', async (req, res) => {
+router.get('/families/:familyId/members', async (c) => {
     try {
-        const { familyId } = req.params;
+        const familyId = c.req.param('familyId');
         const result = await controller.getFamilyCompositionPersons(familyId);
-        return res.status(200).json(result);
+        return c.json(result, 200);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -121,18 +121,18 @@ router.get('/families/:familyId/members', async (req, res) => {
  *     responses:
  *       201: { description: Created }
  */
-router.post('/families/:familyId/observations', async (req, res) => {
+router.post('/families/:familyId/observations', async (c) => {
     try {
-        const { familyId } = req.params;
-        const { observation, whoIsObservingId } = req.body;
+        const familyId = c.req.param('familyId');
+        const { observation, whoIsObservingId } = await c.req.json();
         if (!observation) throw new CustomError('Bad Request', 400, 'Bad Request', 'Observation is required');
         if (!whoIsObservingId) throw new CustomError('Bad Request', 400, 'Bad Request', 'Who Is Observing Id is required');
         
         const newObservation = new Observations(observation, whoIsObservingId);
         const result = await controller.addObservation(newObservation, familyId);
-        return res.status(201).json(result);
+        return c.json(result, 201);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -170,16 +170,17 @@ router.post('/families/:familyId/observations', async (req, res) => {
  *     responses:
  *       200: { description: Updated }
  */
-router.put('/families/:familyId/members/:memberId/documents', async (req, res) => {
+router.put('/families/:familyId/members/:memberId/documents', async (c) => {
     try {
-        const { familyId, memberId } = req.params;
-        const { document } = req.body;
+        const familyId = c.req.param('familyId');
+        const memberId = c.req.param('memberId');
+        const { document } = await c.req.json();
 
         const documents = new Documents(document[0], document[1], document[2], document[3], document[4]);
         const result = await controller.createDocuments(documents, familyId, memberId);
-        return res.status(200).json(result); // Changed to 200 as it's an update
+        return c.json(result, 200); 
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -209,18 +210,18 @@ router.put('/families/:familyId/members/:memberId/documents', async (req, res) =
  *     responses:
  *       200: { description: Updated }
  */
-router.patch('/families/:familyId/ethnicity', async (req, res) => {
+router.patch('/families/:familyId/ethnicity', async (c) => {
     try {
-        const { familyId } = req.params;
+        const familyId = c.req.param('familyId');
         // Corrected typo from 'etnical' to 'ethnical' in API, mapped to internal 'etnical'
-        const { ethnicalSpecifications } = req.body; 
+        const { ethnicalSpecifications } = await c.req.json(); 
         
         if (!ethnicalSpecifications) throw new CustomError('Bad Request', 400, 'Bad Request', 'Ethnical Specifications is required');
         
         const result = await controller.createEtnicalSpecifications(ethnicalSpecifications, familyId);
-        return res.status(200).json(result);
+        return c.json(result, 200);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -267,20 +268,20 @@ router.patch('/families/:familyId/ethnicity', async (req, res) => {
  *     responses:
  *       200: { description: Updated }
  */
-router.put('/families/:familyId/community-ties', async (req, res) => {
+router.put('/families/:familyId/community-ties', async (c) => {
     try {
         // NOTE: The original logic uses 'familyAndCommunityId'. If the frontend passes the Family ID 
         // but the backend expects a specific sub-document ID, we might have a mismatch. 
         // For now, I'm assuming 'familyId' in URL maps to the expected ID by the controller.
-        const { familyId } = req.params; 
-        const { yearsInState, awaysLivingInState, yearsInDistrict, awaysLivingInDistrict, yearsInNeighborhood, awaysLivingInNeighborhood, hasVictimOfThreatsOrDiscrimination, hasNearbySupportNetwork, hasNeighborSupportNetwork, hasParticipatesInSupportGroups, hasParticipatesInSocialMovements, hasNoAccessToLeisureActivities, hasElderWithoutLeisureOrSocialInteraction, hasDependentsLeftAloneAtHome, relationshipEvaluationByTechnician, parentChildRelationshipEvaluation, siblingRelationshipEvaluation, conflictWithOtherResidents } = req.body;
+        const familyId = c.req.param('familyId'); 
+        const { yearsInState, awaysLivingInState, yearsInDistrict, awaysLivingInDistrict, yearsInNeighborhood, awaysLivingInNeighborhood, hasVictimOfThreatsOrDiscrimination, hasNearbySupportNetwork, hasNeighborSupportNetwork, hasParticipatesInSupportGroups, hasParticipatesInSocialMovements, hasNoAccessToLeisureActivities, hasElderWithoutLeisureOrSocialInteraction, hasDependentsLeftAloneAtHome, relationshipEvaluationByTechnician, parentChildRelationshipEvaluation, siblingRelationshipEvaluation, conflictWithOtherResidents } = await c.req.json();
 
         const familyCommunity = new FamilyAndCommunity(yearsInState, awaysLivingInState, yearsInDistrict, awaysLivingInDistrict, yearsInNeighborhood, awaysLivingInNeighborhood, hasVictimOfThreatsOrDiscrimination, hasNearbySupportNetwork, hasNeighborSupportNetwork, hasParticipatesInSupportGroups, hasParticipatesInSocialMovements, hasNoAccessToLeisureActivities, hasElderWithoutLeisureOrSocialInteraction, hasDependentsLeftAloneAtHome, relationshipEvaluationByTechnician, parentChildRelationshipEvaluation, siblingRelationshipEvaluation, conflictWithOtherResidents, true);
         
         const result = await controller.createFamilyAndCommunity(familyCommunity, familyId);
-        return res.status(200).json(result);
+        return c.json(result, 200);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -313,17 +314,17 @@ router.put('/families/:familyId/community-ties', async (req, res) => {
  *     responses:
  *       201: { description: Created }
  */
-router.post('/families/:familyId/community-ties/observations', async (req, res) => {
+router.post('/families/:familyId/community-ties/observations', async (c) => {
     try {
-        const { familyId } = req.params;
-        const { observation, whoIsObservingId } = req.body;
+        const familyId = c.req.param('familyId');
+        const { observation, whoIsObservingId } = await c.req.json();
         if (!observation) throw new CustomError('Bad Request', 400, 'Bad Request', 'Observation is required');
         
         const newObs = new Observations(observation, whoIsObservingId);
         const result = await controller.addFamilyAndCommunityObservation(familyId, newObs);
-        return res.status(201).json(result);
+        return c.json(result, 201);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -356,18 +357,18 @@ router.post('/families/:familyId/community-ties/observations', async (req, res) 
  *     responses:
  *       201: { description: Created }
  */
-router.post('/families/:familyId/benefits', async (req, res) => {
+router.post('/families/:familyId/benefits', async (c) => {
     try {
-        const { familyId } = req.params;
-        const { date, typeOfBenefit, nBirthDate, nCpf } = req.body;
+        const familyId = c.req.param('familyId');
+        const { date, typeOfBenefit, nBirthDate, nCpf } = await c.req.json();
         
         const dateFormater = new Date(date);
         const benefit = new FamilyEventlyBenefits(dateFormater, typeOfBenefit, nBirthDate, nCpf, true);
         
         const result = await controller.createBenefits(benefit, familyId);
-        return res.status(201).json(result);
+        return c.json(result, 201);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -402,19 +403,19 @@ router.post('/families/:familyId/benefits', async (req, res) => {
  *     responses:
  *       201: { description: Created }
  */
-router.post('/members/:memberId/community-convivence', async (req, res) => {
+router.post('/members/:memberId/community-convivence', async (c) => {
     try {
-        const { memberId } = req.params;
-        const { dateOfInitJson, dateOfFinishJson, unity, serviceType, familyCompositionId } = req.body;
+        const memberId = c.req.param('memberId');
+        const { dateOfInitJson, dateOfFinishJson, unity, serviceType, familyCompositionId } = await c.req.json();
         
         const dateOfInit = new Date(dateOfInitJson);
         const dateOfFinish = new Date(dateOfFinishJson);
         const convivation = new FamilyComunitaryConvivation(dateOfInit, dateOfFinish, unity, serviceType);
         
         const result = await controller.createComunitaryConvivation(convivation, familyCompositionId, memberId);
-        return res.status(201).json(result);
+        return c.json(result, 201);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 

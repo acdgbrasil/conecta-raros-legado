@@ -13,13 +13,10 @@ import { HealthyCondition } from "../entity/healthCondition.js";
 import { HomeConditions } from "../entity/homeConditions.js";
 import { Observations } from "../entity/observations.js";
 import { ReferencePerson } from "../entity/referencePerson.js";
-import { User } from "../entity/user.js";
 import { WorkCondition } from "../entity/workCondition.js";
 
 export interface UserRepository {
     findByEmail(email:string):Promise<any>;
-    create(user:User,isAdm:boolean): Promise<User | Error>;
-    delete(email:string): Promise<User | Error>;
     createReferencePerson(referencePerson:ReferencePerson): Promise<ReferencePerson | Error>;
     createReferencePersonObservation(observations:Observations,referencePersonId:string): Promise<Observations | Error>;
     listAllReferencePerson(): Promise<ReferencePerson[] | Error>;

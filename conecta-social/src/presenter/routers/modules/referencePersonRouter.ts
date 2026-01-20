@@ -1,11 +1,11 @@
-import { Router } from 'express';
+import { Hono } from 'hono';
 import { ReferencePersonController } from '../../../useCase/controllers/modules/referencePersonController.js';
 import { CustomError } from '../../../infra/error/error.js';
 import { ReferencePerson } from '../../../domain/entity/referencePerson.js';
 import { converterDataStringParaIsoUtc } from '../../../utils/dateFormater.js';
 import { Observations } from '../../../domain/entity/observations.js';
 
-const router = Router();
+const router = new Hono();
 const controller = new ReferencePersonController();
 
 /**
@@ -56,10 +56,10 @@ const controller = new ReferencePersonController();
  *       201: { description: Created }
  *       400: { description: Bad Request }
  */
-router.post('/reference-persons', async (req, res) => {
+router.post('/reference-persons', async (c) => {
     try {
         // Renamed 'adress' to 'address' in destructuring to match REST standard, but internal mapping keeps entity consistent
-        const { fullName, socialName, motherName, cpf, nis, diagnosis, rgNumber, rgUf, rgIssue, rgDateIssue, isShelter, localLocalization, cep, address, neighborhood, addressNumber, addressComplement, state, city, phone, whoIsObservingId, birthDate, biologicalGender } = req.body;
+        const { fullName, socialName, motherName, cpf, nis, diagnosis, rgNumber, rgUf, rgIssue, rgDateIssue, isShelter, localLocalization, cep, address, neighborhood, addressNumber, addressComplement, state, city, phone, whoIsObservingId, birthDate, biologicalGender } = await c.req.json();
 
         if (!birthDate) throw new CustomError('Bad Request', 400, 'Bad Request', 'Birth Date is required');
         if (!biologicalGender) throw new CustomError('Bad Request', 400, 'Bad Request', 'biologicalGender is required');
@@ -91,10 +91,10 @@ router.post('/reference-persons', async (req, res) => {
         const newReferencePerson = new ReferencePerson('0', fullName, socialName, motherName, nis, cpf, diagnosis, rgNumber, biologicalGender, rgUf, rgIssue, rgDateIssue, isShelter, localLocalization, cep, address, neighborhood, addressNumber, addressComplement, state, city, phone, birthDateFormatted, whoIsObservingId);
         
         const referencePerson = await controller.create(newReferencePerson);
-        return res.status(201).json(referencePerson);
+        return c.json(referencePerson, 201);
 
     } catch (err: any) {
-        return res.status(err.statusCode || 500).json({ error: err.message || 'Internal server error' });
+        return c.json({ error: err.message || 'Internal server error' }, err.statusCode || 500);
     }
 });
 
@@ -109,12 +109,12 @@ router.post('/reference-persons', async (req, res) => {
  *     responses:
  *       200: { description: OK }
  */
-router.get('/reference-persons', async (req, res) => {
+router.get('/reference-persons', async (c) => {
     try {
         const list = await controller.listAll();
-        return res.status(200).json(list);
+        return c.json(list, 200);
     } catch (err) {
-        return res.status(500).json(err);
+        return c.json(err, 500);
     }
 });
 
@@ -135,13 +135,13 @@ router.get('/reference-persons', async (req, res) => {
  *       200: { description: OK }
  *       404: { description: Not Found }
  */
-router.get('/reference-persons/:id', async (req, res) => {
+router.get('/reference-persons/:id', async (c) => {
     try {
-        const { id } = req.params;
+        const id = c.req.param('id');
         const person = await controller.getById(id);
-        return res.status(200).json(person);
+        return c.json(person, 200);
     } catch (err) {
-        return res.status(500).json(err);
+        return c.json(err, 500);
     }
 });
 
@@ -161,13 +161,13 @@ router.get('/reference-persons/:id', async (req, res) => {
  *     responses:
  *       200: { description: OK }
  */
-router.get('/reference-persons/:id/details', async (req, res) => {
+router.get('/reference-persons/:id/details', async (c) => {
     try {
-        const { id } = req.params;
+        const id = c.req.param('id');
         const person = await controller.getWithObservations(id);
-        return res.status(200).json(person);
+        return c.json(person, 200);
     } catch (err) {
-        return res.status(500).json(err);
+        return c.json(err, 500);
     }
 });
 
@@ -200,18 +200,18 @@ router.get('/reference-persons/:id/details', async (req, res) => {
  *     responses:
  *       201: { description: Created }
  */
-router.post('/reference-persons/:id/observations', async (req, res) => {
-    const { id } = req.params;
-    const { observation, whoIsObservingId } = req.body;
+router.post('/reference-persons/:id/observations', async (c) => {
+    const id = c.req.param('id');
     try {
+        const { observation, whoIsObservingId } = await c.req.json();
         if (!observation) throw new CustomError('Bad Request', 400, 'Bad Request', 'Observation is required');
         if (!whoIsObservingId) throw new CustomError('Bad Request', 400, 'Bad Request', 'Who Is Observing Id is required');
         
         const newObservation = new Observations(observation, whoIsObservingId);
         const created = await controller.addObservation(newObservation, id);
-        return res.status(201).json(created);
+        return c.json(created, 201);
     } catch (err) {
-        return res.status(500).json(err);
+        return c.json(err, 500);
     }
 });
 

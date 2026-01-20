@@ -1,7 +1,6 @@
 import { User } from '../../domain/entity/user.js';
 import {  UserRepository} from '../../domain/repository/userRepository.js';
 import { CustomError } from '../error/error.js';
-import {changePassword, create, createADM, deactivateUser, findByEmail, findById, listAllUsers} from '../database/postgress/postgressDTO.js'
 import { AuthRepository } from '../../domain/repository/authRepository.js';
 import { createCode, findCode } from './mongodb/mongoDtos/mongodbDto.js';
 import { AdmRepository } from '../../domain/repository/admRepository.js';

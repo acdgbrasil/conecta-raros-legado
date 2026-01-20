@@ -1,9 +1,9 @@
-import { Router } from 'express';
+import { Hono } from 'hono';
 import { UserManagementController } from '../../../useCase/controllers/modules/userManagementController.js';
 import { User, UserRole } from '../../../domain/entity/user.js';
 import { CustomError } from '../../../infra/error/error.js';
 
-const router = Router();
+const router = new Hono();
 const controller = new UserManagementController();
 
 /**
@@ -40,15 +40,15 @@ const controller = new UserManagementController();
  *       500:
  *         description: Erro interno
  */
-router.post('/create/adm', async (req, res) => {
+router.post('/create/adm', async (c) => {
     try {
-        const { email, fullName, admEmail } = req.body;
+        const { email, fullName, admEmail } = await c.req.json();
         const superAdmEmail = process.env.SUPER_ADM_EMAIL;
         const isSuperAdm = superAdmEmail === admEmail;
 
         if (!isSuperAdm) {
             const error = new CustomError('Bad Request', 400, 'Bad Request', 'You are not allowed to create a new adm');
-            return res.status(400).json(error.toJson('You are not allowed to create a new adm'));
+            return c.json(error.toJson('You are not allowed to create a new adm'), 400);
         }
 
         if (!email) throw new CustomError('Bad Request', 400, 'Bad Request', 'Email is required');
@@ -56,10 +56,10 @@ router.post('/create/adm', async (req, res) => {
 
         const newUser = new User(0, fullName, email, 'Senh@123', null, UserRole.admin.toString(), new Date(), new Date(), true);
         const user = await controller.create(newUser, true);
-        return res.status(201).json(user);
+        return c.json(user, 201);
 
-    } catch (e) {
-        return res.status(500).json(e);
+    } catch (e: any) {
+        return c.json(e, 500);
     }
 });
 
@@ -98,9 +98,9 @@ router.post('/create/adm', async (req, res) => {
  *       400:
  *         description: Dados inválidos ou permissão negada
  */
-router.post('/create/user', async (req, res) => {
+router.post('/create/user', async (c) => {
     try {
-        const { admEmail, email, fullName, crm } = req.body;
+        const { admEmail, email, fullName, crm } = await c.req.json();
         if (!email) throw new CustomError('Bad Request', 400, 'Bad Request', 'Email is required');
         if (!fullName) throw new CustomError('Bad Request', 400, 'Bad Request', 'Full Name is required');
         if (!crm) throw new CustomError('Bad Request', 400, 'Bad Request', 'Crm is required');
@@ -110,16 +110,16 @@ router.post('/create/user', async (req, res) => {
 
         if (!isAdm) {
             const error = new CustomError('Bad Request', 400, 'Bad Request', 'You are not allowed to create a new user');
-            return res.status(400).json(error.toJson('You are not allowed to create a new user'));
+            return c.json(error.toJson('You are not allowed to create a new user'), 400);
         }
 
         const newUser = new User(0, fullName, email, 'Senh@123', crm, UserRole.user.toString(), new Date(), new Date(), true);
         const user = await controller.create(newUser, false);
-        return res.status(201).json(user);
+        return c.json(user, 201);
 
-    } catch (e) {
+    } catch (e: any) {
         console.log(e);
-        return res.status(500).json(e);
+        return c.json(e, 500);
     }
 });
 

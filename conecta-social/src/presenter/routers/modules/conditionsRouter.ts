@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Hono } from 'hono';
 import { ConditionsController } from '../../../useCase/controllers/modules/conditionsController.js';
 import { CustomError } from '../../../infra/error/error.js';
 import { HomeConditions } from '../../../domain/entity/homeConditions.js';
@@ -8,7 +8,7 @@ import { WorkConditionPerson, EducationConditionPerson, OcurruncyBolsaFamilia, P
 import { HealthyCondition, HealthyConditionStruct } from '../../../domain/entity/healthCondition.js';
 import { HealthyConditionFamily } from '../../../domain/entity/familyHealthyCondition.js';
 
-const router = Router();
+const router = new Hono();
 const controller = new ConditionsController();
 
 // --- HOME ---
@@ -50,10 +50,10 @@ const controller = new ConditionsController();
  *     responses:
  *       200: { description: Updated }
  */
-router.put('/families/:familyId/home-conditions', async (req, res) => {
+router.put('/families/:familyId/home-conditions', async (c) => {
     try {
-        const { familyId } = req.params; // Mapped to homeConditionsId in original logic
-        const { typeResidence, materialOfExternalWalls, hasAcessEnergy, waterSupply, sewageDisposal, garbageCollection, hasWasteCollection, homeConditionIsInRiskArea, difficultyToAccessHome, hasHomeInsurance, hasHomeInsuranceValue, numberOfRooms, numberOfBedrooms, numberOfPeapleInBedrooms } = req.body;
+        const familyId = c.req.param('familyId'); 
+        const { typeResidence, materialOfExternalWalls, hasAcessEnergy, waterSupply, sewageDisposal, garbageCollection, hasWasteCollection, homeConditionIsInRiskArea, difficultyToAccessHome, hasHomeInsurance, hasHomeInsuranceValue, numberOfRooms, numberOfBedrooms, numberOfPeapleInBedrooms } = await c.req.json();
         
         const homeConditions = new HomeConditions(
             typeResidence, materialOfExternalWalls, hasAcessEnergy, waterSupply, sewageDisposal, garbageCollection, 
@@ -62,9 +62,9 @@ router.put('/families/:familyId/home-conditions', async (req, res) => {
         );
 
         const result = await controller.createHomeConditions(homeConditions, familyId);
-        return res.status(200).json(result);
+        return c.json(result, 200);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -96,17 +96,17 @@ router.put('/families/:familyId/home-conditions', async (req, res) => {
  *     responses:
  *       201: { description: Created }
  */
-router.post('/families/:familyId/home-conditions/observations', async (req, res) => {
+router.post('/families/:familyId/home-conditions/observations', async (c) => {
     try {
-        const { familyId } = req.params;
-        const { observation, whoIsObservingId } = req.body;
+        const familyId = c.req.param('familyId');
+        const { observation, whoIsObservingId } = await c.req.json();
         if (!observation) throw new CustomError('Bad Request', 400, 'Bad Request', 'Observation is required');
         
         const newObservation = new Observations(observation, whoIsObservingId);
         const result = await controller.addHomeObservation(newObservation, familyId);
-        return res.status(201).json(result);
+        return c.json(result, 201);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -153,18 +153,18 @@ router.post('/families/:familyId/home-conditions/observations', async (req, res)
  *     responses:
  *       200: { description: Updated }
  */
-router.put('/members/:memberId/work-conditions', async (req, res) => {
+router.put('/members/:memberId/work-conditions', async (c) => {
     try {
-        const { memberId } = req.params;
-        const { hasSocialIncome, perCapitaIncome, bolsaFamiliaValue, bpcValue, petiValue, othersValue, bcpBenefitPerson, hasRetiredPerson, totalFamilyIncome, totalPerCapitaIncome, workConditionBody, hasWorkCard, workQualification, workValue, familyCompositionID, workConditionId } = req.body;
+        const memberId = c.req.param('memberId');
+        const { hasSocialIncome, perCapitaIncome, bolsaFamiliaValue, bpcValue, petiValue, othersValue, bcpBenefitPerson, hasRetiredPerson, totalFamilyIncome, totalPerCapitaIncome, workConditionBody, hasWorkCard, workQualification, workValue, familyCompositionID, workConditionId } = await c.req.json();
         
         const workCondition = new WorkCondition(hasSocialIncome, perCapitaIncome, hasSocialIncome, bolsaFamiliaValue, bpcValue, petiValue, othersValue, bcpBenefitPerson, hasRetiredPerson, totalFamilyIncome, totalPerCapitaIncome);
         const workConditionPerson = new WorkConditionPerson(true, workConditionBody, hasWorkCard, workQualification, workValue);
         
         const result = await controller.createWorkCondition(workCondition, workConditionPerson, familyCompositionID, memberId, workConditionId);
-        return res.status(200).json(result);
+        return c.json(result, 200);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -213,10 +213,10 @@ router.put('/members/:memberId/work-conditions', async (req, res) => {
  *     responses:
  *       200: { description: Updated }
  */
-router.put('/members/:memberId/health-conditions', async (req, res) => {
+router.put('/members/:memberId/health-conditions', async (c) => {
     try {
-        const { memberId } = req.params;
-        const { hasFamilyMemberNeedsConstantCare, hasFamilyMemberNeedsConstantCareList, hasFamilyMemberHasAlimentarInsecure, hasFamilyMemberUsesControlledMedication, hasFamilyMemberUsesControlledMedicationList, hasFamilyMemberAbusesAlcohol, hasFamilyMemberAbusesAlcoholList, hasFamilyMemberAbusesDrugs, hasFamilyMemberAbusesDrugsList, hasFamilyMemberSevereIllness, hasFamilyMemberSevereIllnessList, healthyConditionId, typeOfDeficiency, hasHealthyNeeds, whoIsResponsibleForHelp, pregnancyMonths, hasPreNatal, familyCompositionID } = req.body;
+        const memberId = c.req.param('memberId');
+        const { hasFamilyMemberNeedsConstantCare, hasFamilyMemberNeedsConstantCareList, hasFamilyMemberHasAlimentarInsecure, hasFamilyMemberUsesControlledMedication, hasFamilyMemberUsesControlledMedicationList, hasFamilyMemberAbusesAlcohol, hasFamilyMemberAbusesAlcoholList, hasFamilyMemberAbusesDrugs, hasFamilyMemberAbusesDrugsList, hasFamilyMemberSevereIllness, hasFamilyMemberSevereIllnessList, healthyConditionId, typeOfDeficiency, hasHealthyNeeds, whoIsResponsibleForHelp, pregnancyMonths, hasPreNatal, familyCompositionID } = await c.req.json();
 
         if (!healthyConditionId) throw new CustomError('Bad Request', 400, 'Bad Request', 'Id is required');
 
@@ -242,9 +242,9 @@ router.put('/members/:memberId/health-conditions', async (req, res) => {
         const pregnant = new Pregnant(pregnancyMonths, hasPreNatal, true);
 
         const result = await controller.createHealthCondition(healthyCondition, healthyConditionId, familyHealth, familyCompositionID, memberId, pregnant);
-        return res.status(200).json(result);
+        return c.json(result, 200);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
@@ -281,19 +281,19 @@ router.put('/members/:memberId/health-conditions', async (req, res) => {
  *     responses:
  *       200: { description: Updated }
  */
-router.put('/members/:memberId/education', async (req, res) => {
+router.put('/members/:memberId/education', async (c) => {
     try {
-        const { memberId } = req.params;
-        const { literaty, schoolShip, isStudying, occurentDate, efect, suspensionSolicitation, familyCompositionID } = req.body;
+        const memberId = c.req.param('memberId');
+        const { literaty, schoolShip, isStudying, occurentDate, efect, suspensionSolicitation, familyCompositionID } = await c.req.json();
         
         const occurentDateDate = new Date(occurentDate);
         const bolsaFamilia = new OcurruncyBolsaFamilia(occurentDateDate, efect, suspensionSolicitation);
         const education = new EducationConditionPerson(true, literaty, schoolShip, isStudying, bolsaFamilia);
 
         const result = await controller.createEducationCondition(education, familyCompositionID, memberId);
-        return res.status(200).json(result);
+        return c.json(result, 200);
     } catch (e: any) {
-        res.status(e.statusCode || 500).json(e);
+        return c.json(e, e.statusCode || 500);
     }
 });
 
