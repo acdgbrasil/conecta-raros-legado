@@ -1,26 +1,19 @@
 {
-  "name": "project-amn",
-  "version": "1.0.0",
-  "description": "",
+  "name": "conecta-social-api",
+  "version": "1.0.0-alpha.1",
+  "description": "API Modular (IAM, Notifications, Social) utilizando Clean Architecture e Hono.",
   "type": "module",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun --watch src/index.ts",
-    "start": "bun src/index.ts",
-    "docker_init": "npx prisma migrate deploy && npm run start"
+  "main": "src/index.ts",
+  "modules_version": {
+    "iam": "1.0.0-alpha",
+    "notifications": "1.0.0-alpha",
+    "social": "0.0.0-legacy",
+    "shared": "1.0.0-alpha"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/bun": "^1.3.6",
-    "@types/jsonwebtoken": "^9.0.6",
-    "@types/node": "^25.0.9",
-    "@types/swagger-jsdoc": "^6.0.4",
-    "typescript": "^5.2.2"
-  },
-  "dependencies": {
+  "workspaces": [
+    "src/modules/*"
+  ],
+  "catalog": {
     "@sendgrid/mail": "^8.1.3",
     "@types/bcrypt": "^6.0.0",
     "bcrypt": "^6.0.0",
@@ -30,6 +23,49 @@
     "mongoose": "^9.1.3",
     "resend": "^6.7.0",
     "swagger-jsdoc": "^6.2.8",
-    "zod": "^4.3.5"
+    "zod": "^4.3.5",
+    "@types/bun": "^1.3.6",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^25.0.9",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "dev:hot": "bun --hot src/index.ts",
+    "start": "bun src/index.ts",
+    "test": "bun test",
+    "migrate:iam": "bun src/modules/shared/infra/postgres/migrations/iam.migration.ts",
+    "seed:iam": "bun src/modules/shared/infra/postgres/migrations/seed.migration.ts",
+    "docker:up": "docker-compose up -d --build",
+    "maturity:check": "gemini -c context_files/ --prompt prompt_maturidade.txt > handbook/reports/DATA_MATURITY_REPORT.md"
+  },
+  "keywords": [
+    "clean-architecture",
+    "iam",
+    "notifications",
+    "hono",
+    "bun"
+  ],
+  "author": "Conecta Social Team",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "@types/jsonwebtoken": "catalog:",
+    "@types/node": "catalog:",
+    "@types/swagger-jsdoc": "catalog:",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "catalog:",
+    "@types/bcrypt": "catalog:",
+    "bcrypt": "catalog:",
+    "dotenv": "catalog:",
+    "hono": "catalog:",
+    "jsonwebtoken": "catalog:",
+    "mongoose": "catalog:",
+    "resend": "catalog:",
+    "swagger-jsdoc": "catalog:",
+    "zod": "catalog:"
   }
 }

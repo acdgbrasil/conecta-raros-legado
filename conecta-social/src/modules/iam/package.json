@@ -1,0 +1,13 @@
+{
+  "name": "@modules/iam",
+  "version": "1.0.0-alpha",
+  "dependencies": {
+    "zod": "catalog:",
+    "hono": "catalog:",
+    "@modules/shared": "workspace:*",
+    "@modules/notifications": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

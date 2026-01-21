@@ -1,5 +1,6 @@
-import { UserEntity } from "../../domain/entity/User.entity";
-import { User } from "../../domain/factorys/User.factory";
+import { UserEntity } from "../../domain/user/entity/User.entity"; 
+import { User } from "../../domain/user/factories/User.factory"; 
+import { UserResponse } from "./User.output";
 
 export const UserMapper = {
   toDomain(raw: any): User {
@@ -22,6 +23,7 @@ export const UserMapper = {
     };
     return User.restore(props);
   },
+  
   toPersistence(user: User): any {
     return {
       id: user.id,
@@ -40,9 +42,10 @@ export const UserMapper = {
       updated_at: user.props.updatedAt ? user.props.updatedAt.toISOString() : null,
     };
   },
-  toResponse(user: User): any {
+  
+  toResponse(user: User): UserResponse {
     return {
-      id: user.id,
+      id: user.id!,
       name: user.name,
       email: user.email,
       roleId: user.roleId,
@@ -52,6 +55,8 @@ export const UserMapper = {
       jobTitle: user.props.jobTitle,
       department: user.props.department,
       lastLoginAt: user.props.lastLoginAt,
+      createdAt: user.props.createdAt,
+      updatedAt: user.props.updatedAt
     };
   }
 }

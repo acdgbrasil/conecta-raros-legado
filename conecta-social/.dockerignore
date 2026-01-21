@@ -1,0 +1,31 @@
+# Dependências e Logs
+node_modules
+npm-debug.log
+bun.lockb
+
+# Módulos Desligados (Legado)
+src/modules/social
+
+# Git e IDEs
+.git
+.gitignore
+.vscode
+.idea
+.cursor
+
+# Documentação e Notas do Projeto
+*.md
+conecta-social.postman_collection.json
+prompt.md
+initProject.sh
+
+# Variáveis de Ambiente
+.env
+.env.local
+example.env
+
+# Docker e Build
+Dockerfile
+.dockerignore
+dist
+build
