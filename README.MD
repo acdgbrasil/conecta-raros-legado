@@ -60,6 +60,10 @@ make debug-db # diagnostico de conexao DB
 - As migracoes atuais focam no modulo **IAM**.
 - Os servicos padrao usam Postgres, Mongo e Nginx via Docker.
 
+## Licenca
+Este projeto e licenciado sob **CC BY-NC-SA 4.0**. O uso comercial e proibido.
+Veja `LICENSE`.
+
 ---
 
 Se precisar, posso detalhar fluxo de deploy, variaveis de ambiente e padroes de arquitetura.
