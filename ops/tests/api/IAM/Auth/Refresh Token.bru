@@ -1,0 +1,28 @@
+meta {
+  name: Refresh Token
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/auth/refresh
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "refreshToken": "{{refresh_token}}"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.token: isString
+}
+
+tests {
+  test("Deve retornar novo token", function() {
+    expect(res.body.token).to.not.equal(bru.getEnvVar("jwt_token"));
+  });
+}

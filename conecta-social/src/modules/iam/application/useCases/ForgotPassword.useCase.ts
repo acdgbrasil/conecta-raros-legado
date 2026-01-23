@@ -35,10 +35,11 @@ export class ForgotPasswordUseCase implements UseCaseProvider<ForgotPasswordInpu
       return { message: "Se o e-mail estiver cadastrado, você receberá um código de recuperação." };
     }
 
-    const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const recoveryCode = this.recoveryRepository.createRecoveryCode();
     const expiresAt = new Date(Date.now() + (TimeInSeconds.FIFTEEN_MINUTES * 1000));
     
-    await this.recoveryRepository.saveRecoveryCode(user.email, recoveryCode, expiresAt);
+    // Passa o ID do usuário para garantir FK
+    await this.recoveryRepository.saveRecoveryCode(user.id!, recoveryCode, expiresAt);
 
     // Publica o evento ao invés de chamar o outro UseCase diretamente
     await this.eventBus.publish(new PasswordRecoveryRequestedEvent(user.email, recoveryCode));

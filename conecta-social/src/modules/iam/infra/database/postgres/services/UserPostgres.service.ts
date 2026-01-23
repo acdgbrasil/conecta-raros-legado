@@ -11,8 +11,9 @@ export class UserPostgresRepository implements UserRepository {
       await pg`
         UPDATE users SET
           name = ${p.name},
+          email = ${p.email},
+          person_id = ${p.personId || null},
           role_id = ${p.roleId},
-          cpf = ${p.cpf || null},
           job_title = ${p.jobTitle || null},
           department = ${p.department || null},
           password_hash = ${p.passwordHash || null},
@@ -26,11 +27,13 @@ export class UserPostgresRepository implements UserRepository {
       await pg`
         INSERT INTO users (
           name, email, role_id, created_by, 
-          cpf, job_title, department,
+          person_id,
+          job_title, department,
           password_hash, force_change_password, is_active
         ) VALUES (
           ${p.name}, ${p.email}, ${p.roleId}, ${p.createdBy || null},
-          ${p.cpf || null}, ${p.jobTitle || null}, ${p.department || null},
+          COALESCE(${p.personId || null}, uuidv7()),
+          ${p.jobTitle || null}, ${p.department || null},
           ${p.passwordHash || ''}, ${p.forceChangePassword}, ${p.isActive}
         )
       `;
@@ -85,9 +88,9 @@ export class UserPostgresRepository implements UserRepository {
     // COUNT(*) OVER() é performático o suficiente para este volume
     const rows = await pg`
       SELECT 
-        u.id, u.name, u.email, u.role_id, u.is_active, u.job_title, u.department,
+        u.id, u.person_id, u.name, u.email, u.role_id, u.is_active, u.job_title, u.department,
         u.created_at, u.updated_at, u.last_login_at,
-        u.force_change_password, u.cpf,
+        u.force_change_password,
         r.name as role_name,
         COUNT(*) OVER() as full_count
       FROM users u

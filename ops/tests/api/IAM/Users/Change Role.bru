@@ -1,0 +1,26 @@
+meta {
+  name: Change Role
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/api/users/{{created_user_id}}/role
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+body:json {
+  {
+    "role": "ADMIN"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.role: eq ADMIN
+}

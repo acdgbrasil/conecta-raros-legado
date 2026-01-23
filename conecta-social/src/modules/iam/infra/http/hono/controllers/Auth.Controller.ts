@@ -61,7 +61,7 @@ export class AuthController {
 
   async resetPassword(c: Context) {
     try {
-      const body = await c.req.json();
+      let body = await c.req.json();
       const result = await this.resetUseCase.execute(body);
       return c.json(result, 200);
     } catch (error: any) {

@@ -1,34 +1,62 @@
-import { pg } from "../client/postgres.client"; // Ajuste para seu client
+import { pg } from "../client/postgres.client";
 
 export async function createNotificationTables() {
   console.log("🛠️  Criando tabelas de Notificações...");
 
-  await pg`
-    CREATE TABLE IF NOT EXISTS notifications (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      
-      -- Dados de Envio
-      recipient VARCHAR(255) NOT NULL,
-      channel VARCHAR(50) NOT NULL, -- EMAIL, SMS, ETC
-      subject VARCHAR(255),         -- Pode ser null (SMS não tem assunto)
-      content TEXT NOT NULL,        -- O corpo da mensagem
-      
-      -- Rastreabilidade
-      recipient_id UUID,            -- Opcional: Link com a tabela Users se quiser
-      metadata JSONB DEFAULT '{}',  -- Aqui guardamos o erro ou o ID da AWS/Provider
-      
-      -- Controle
-      status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
-      sent_at TIMESTAMP,
-      
-      -- Timestamps padrão
-      created_at TIMESTAMP DEFAULT NOW(),
-      updated_at TIMESTAMP DEFAULT NOW()
-    );
-  `;
-  
-  // Índice para buscar histórico de um usuário rápido
-  await pg`CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON notifications(recipient);`;
-  
-  console.log("✅ Tabela 'notifications' pronta.");
+  try {
+    // 0. Configura Timezone
+    await pg`SET TIME ZONE 'America/Fortaleza';`;
+
+    // 1. Tipos ENUM Nativos (Type Safety & Performance)
+    // Try/Catch para evitar erro se já existirem
+    try { await pg`CREATE TYPE notification_channel_enum AS ENUM ('EMAIL', 'SMS', 'WHATSAPP', 'PUSH');`; } catch {}
+    try { await pg`CREATE TYPE notification_status_enum AS ENUM ('PENDING', 'SENT', 'FAILED');`; } catch {}
+
+    // 2. Tabela NOTIFICATIONS
+    // Mudança: VARCHAR -> TEXT, TIMESTAMP -> TIMESTAMPTZ
+    // Mudança: Strings -> ENUMs
+    await pg`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id UUID PRIMARY KEY DEFAULT uuidv7(),
+        
+        -- Core Data
+        recipient TEXT NOT NULL,
+        channel notification_channel_enum NOT NULL,
+        status notification_status_enum NOT NULL DEFAULT 'PENDING',
+        
+        subject TEXT,
+        content TEXT NOT NULL,
+        
+        -- Traceability
+        recipient_id UUID, -- Loose coupling (sem FK restritiva para permitir envio a não-usuários)
+        metadata JSONB DEFAULT '{}',
+        
+        -- Timestamps
+        sent_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `;
+    
+    // Índice de busca por destinatário
+    await pg`CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON notifications(recipient);`;
+
+    // Índice Parcial para WORKERS (High Performance Queue Pattern)
+    // Permite que workers encontrem instantaneamente o que precisa ser processado
+    await pg`
+      CREATE INDEX IF NOT EXISTS idx_notifications_pending_worker 
+      ON notifications(created_at) 
+      WHERE status = 'PENDING';
+    `;
+    
+    console.log("✅ Tabela 'notifications' pronta.");
+
+  } catch (error) {
+    console.error("❌ Erro na migração de Notificações:", error);
+    process.exit(1);
+  } finally {
+    await pg.close();
+  }
 }
+
+createNotificationTables();

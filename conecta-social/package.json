@@ -36,6 +36,7 @@
     "start": "bun src/index.ts",
     "test": "bun test",
     "migrate:iam": "bun src/modules/shared/infra/postgres/migrations/iam.migration.ts",
+    "migrate:notifications": "bun src/modules/shared/infra/postgres/migrations/notification.migration.ts",
     "seed:iam": "bun src/modules/shared/infra/postgres/migrations/seed.migration.ts",
     "docker:up": "docker-compose up -d --build",
     "maturity:check": "gemini -c context_files/ --prompt prompt_maturidade.txt > handbook/reports/DATA_MATURITY_REPORT.md"
@@ -62,6 +63,7 @@
     "bcrypt": "catalog:",
     "dotenv": "catalog:",
     "hono": "catalog:",
+    "hono-zod-openapi": "^1.0.1",
     "jsonwebtoken": "catalog:",
     "mongoose": "catalog:",
     "resend": "catalog:",

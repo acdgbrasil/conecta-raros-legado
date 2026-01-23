@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Instala dependências
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Copia o código fonte
 COPY . .
@@ -36,6 +36,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
+
+# Copia arquivos fonte e configs para modo DEV
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/tsconfig.json ./
+COPY --from=builder /app/next.config.ts ./
+COPY --from=builder /app/postcss.config.mjs ./
+COPY --from=builder /app/eslint.config.mjs ./
 
 # Define permissões
 RUN chown -R nextjs:nodejs /app

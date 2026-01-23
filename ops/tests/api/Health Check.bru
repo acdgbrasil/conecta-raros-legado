@@ -1,0 +1,29 @@
+meta {
+  name: Health Check
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/health
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq ok
+}
+
+tests {
+  test("Deve responder em menos de 500ms", function() {
+    expect(res.responseTime).to.be.below(500);
+  });
+
+  test("Deve ter um timestamp válido", function() {
+    const body = res.getBody();
+    expect(body.timestamp).to.be.a('string');
+    // Verifica se é uma data válida
+    expect(new Date(body.timestamp).toString()).to.not.equal('Invalid Date');
+  });
+}

@@ -1,24 +1,26 @@
 import { RecoveryRepository } from "../../../../domain/authentication/repository/Recovery.repository";
 import { pg } from "../../../../../shared/infra/postgres/client/postgres.client";
+import { randomInt } from "node:crypto";
 
 export class RecoveryPostgresRepository implements RecoveryRepository {
   createRecoveryCode(): string {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    //TODO: USAR UMA LIB DE CÓDIGO TEMPORÁRIO MAIS SEGURO DO BUN
+    const code = randomInt(100000, 1000000).toString();
     return code;
   }
   
-  async saveRecoveryCode(email: string, code: string, expiresAt: Date): Promise<void> {
+  async saveRecoveryCode(userId: string, code: string, expiresAt: Date): Promise<void> {
     await pg`
-      INSERT INTO recovery_codes (email, code, expires_at)
-      VALUES (${email}, ${code}, ${expiresAt.toISOString()})
+      INSERT INTO recovery_codes (user_id, code, expires_at)
+      VALUES (${userId}, ${code}, ${expiresAt.toISOString()})
     `;
     return Promise.resolve();
   }
   
-  async findValidRecoveryCode(email: string, code: string): Promise<{ id: string; } | null> {
+  async findValidRecoveryCode(userId: string, code: string): Promise<{ id: string; } | null> {
     const [row] = await pg`
       SELECT id FROM recovery_codes
-      WHERE email = ${email} 
+      WHERE user_id = ${userId} 
         AND code = ${code} 
         AND used = false 
         AND expires_at > NOW()

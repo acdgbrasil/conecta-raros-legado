@@ -1,0 +1,26 @@
+# Documentacao Humana (PT-BR)
+
+Esta versao e feita para leitura humana: explicacoes conceituais, contexto e exemplos para reforco.
+
+## Indice
+- [1. 00 - Visao geral e convencoes](chapters/00-overview.md)
+- [2. 01 - Inicio rapido](chapters/01-quickstart.md)
+- [3. 02 - Conexoes e topologia](chapters/02-connections-and-topology.md)
+- [4. 03 - Schemas e tipos](chapters/03-schemas-and-types.md)
+- [5. 04 - Documentos e subdocumentos](chapters/04-documents-and-subdocs.md)
+- [6. 05 - Consultas e casting](chapters/05-queries-and-casting.md)
+- [7. 06 - Validacao e middleware](chapters/06-validation-and-middleware.md)
+- [8. 07 - Populate e relacoes](chapters/07-populate-and-relations.md)
+- [9. 08 - Modelagem avancada](chapters/08-advanced-modeling.md)
+- [10. 09 - Plugins, transacoes e change streams](chapters/09-plugins-transactions-change-streams.md)
+- [11. 10 - Performance e seguranca](chapters/10-performance-and-security.md)
+- [12. 11 - TypeScript e testes](chapters/11-typescript-and-testing.md)
+- [13. 12 - Deploy, compatibilidade e migracoes](chapters/12-deployment-compat-migrations.md)
+- [14. 13 - Troubleshooting e FAQ](chapters/13-troubleshooting-and-faq.md)
+- [15. 14 - Leituras adicionais e referencias](chapters/14-further-reading.md)
+- [16. 15 - Agregacoes](chapters/15-aggregations.md)
+- [17. 16 - Performance, indices e observabilidade](chapters/16-performance-observability.md)
+- [18. 17 - Seguranca, multi-tenant e operacao](chapters/17-security-multitenant-ops.md)
+- [19. 18 - Migracoes de dados](chapters/18-data-migrations.md)
+- [20. 19 - Arquitetura e guia de agentes](chapters/19-architecture-and-agents.md)
+- [21. 20 - Referencia rapida e checklists](chapters/20-quick-reference-checklists.md)

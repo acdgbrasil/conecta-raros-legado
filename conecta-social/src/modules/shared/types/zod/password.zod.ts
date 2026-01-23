@@ -1,4 +1,5 @@
 import z from "zod";
+import "hono-zod-openapi";
 
 export const PasswordStrongSchema = z
   .string()
@@ -20,4 +21,8 @@ export const PasswordStrongSchema = z
       error: "Senha deve conter pelo menos 1 caractere especial (!@#$)",
       abort: true,
     })
-  );
+  )
+  .meta({
+    description: "Senha forte: min 8 chars, 1 maiúscula, 1 minúscula, 1 número, 1 caractere especial.",
+    example: "StrongP@ssw0rd!"
+  });

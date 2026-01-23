@@ -1,32 +1,24 @@
-# Estágio 1: Instalação de Dependências
-FROM oven/bun:1-alpine AS deps
+# use the official Bun image
+FROM oven/bun:1-alpine AS base
 WORKDIR /app
 
-# Copia arquivos de definição de pacotes
-COPY package.json bun.lock ./
+# Garante a versão mais recente do Bun para correções no driver SQL
+RUN bun upgrade
 
-# Instala dependências (incluindo devDependencies para build se necessário)
-RUN bun install --frozen-lockfile
+# Em desenvolvimento, vamos simplificar para garantir que os Workspaces funcionem.
+# Workspaces dependem de symlinks relativos que quebram facilmente em multi-stage complexos.
 
-# Estágio 2: Execução
-FROM oven/bun:1-alpine AS runner
-WORKDIR /app
+# 1. Copia tudo primeiro (respeitando .dockerignore)
+COPY . .
 
-# Copia apenas as dependências instaladas
-COPY --from=deps /app/node_modules ./node_modules
-COPY package.json ./
+# 2. Garante que não há node_modules antigos e instala do zero
+RUN rm -rf node_modules src/modules/*/node_modules && bun install
 
-# Copia apenas o código fonte necessário (ignora o que não é usado)
-# Nota: O .dockerignore deve lidar com pastas como 'social' se quiser ser restrito,
-# mas aqui copiamos o src inteiro para garantir que os módulos compartilhados funcionem.
-COPY src ./src
-COPY tsconfig.json ./
-
-# Define o ambiente como produção
-ENV NODE_ENV=production
+# Variáveis de ambiente
+ENV NODE_ENV=development
 ENV PORT=3000
 
-EXPOSE 3000
+EXPOSE 3000/tcp
 
-# Inicializa o servidor usando o ponto de entrada principal
-CMD ["bun", "run", "src/index.ts"]
+# O comando 'dev' é o padrão
+CMD [ "bun", "run", "dev" ]

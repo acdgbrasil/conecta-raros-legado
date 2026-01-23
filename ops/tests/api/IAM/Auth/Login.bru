@@ -1,0 +1,35 @@
+meta {
+  name: Login (Admin)
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:80/api/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{email}}",
+    "password": "{{password}}"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.token: isString
+}
+
+script:post-response {
+  // Salva o token na variável de ambiente para as próximas requisições
+  bru.setEnvVar("jwt_token", res.body.token);
+  bru.setEnvVar("refresh_token", res.body.refreshToken);
+}
+
+tests {
+  test("Deve retornar token JWT", function() {
+    expect(res.body.token).to.be.a('string');
+  });
+}

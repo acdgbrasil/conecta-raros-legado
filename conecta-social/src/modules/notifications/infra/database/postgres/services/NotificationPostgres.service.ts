@@ -12,7 +12,7 @@ export class NotificationPostgresRepository implements NotificationRepository {
         recipient_id, metadata, status, sent_at, 
         created_at, updated_at
       ) VALUES (
-        ${n.id}, ${n.recipient}, ${n.channel}, ${n.subject}, ${n.content},
+        COALESCE(${n.id || null}, uuidv7()), ${n.recipient}, ${n.channel}, ${n.subject}, ${n.content},
         ${n.recipient_id}, ${n.metadata}, ${n.status}, ${n.sent_at},
         ${n.created_at}, ${n.updated_at}
       )

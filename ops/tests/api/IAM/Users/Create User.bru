@@ -1,0 +1,33 @@
+meta {
+  name: Create User
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMTliZTkyOS1hNDVlLTc2MGMtOTk1YS00MTdhNmU3YmNkYmYiLCJ0eXBlIjoiYWNjZXNzIiwicm9sZUlkIjoiMDE5YmU5MjktYTQxZS03OTEzLWFlNTctY2ZkODNkYjNiZWFlIiwicGVybWlzc2lvbnMiOlsidXNlcnM6cmVhZCIsInVzZXJzOndyaXRlIiwidXNlcnM6YmxvY2siLCJ1c2Vyczpwcm9tb3RlIiwiZmFtaWxpZXM6cmVhZCIsImZhbWlsaWVzOndyaXRlIiwicmVwb3J0czpyZWFkIiwic2V0dGluZ3M6cmVhZCIsInNldHRpbmdzOndyaXRlIl0sImlhdCI6MTc2OTE0NDYzOCwiZXhwIjoxNzY5MTQ0OTM4LCJuYmYiOjE3NjkxNDQ2Mzd9.LyA61Fewc3hYIMxasToOq7hwBu1_8gktkxZm78UKbuo
+}
+
+body:json {
+  {
+    "name": "Test User Bruno",
+    "email": "bruno.test@conecta.com",
+    "password": "Password123!",
+    "role": "USER"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.id: isString
+}
+
+script:post-response {
+  bru.setEnvVar("created_user_id", res.body.id);
+}

@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Conecta Social API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

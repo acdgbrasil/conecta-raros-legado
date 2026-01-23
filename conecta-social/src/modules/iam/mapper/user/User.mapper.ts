@@ -6,12 +6,12 @@ export const UserMapper = {
   toDomain(raw: any): User {
     const props: UserEntity = {
       id: raw.id,
+      personId: raw.person_id, // Mapeamento do Golden Record
       name: raw.name,
       email: raw.email,
       passwordHash: raw.password_hash,
       roleId: raw.role_id,
       permissions: raw.permissions || [],
-      cpf: raw.cpf,
       jobTitle: raw.job_title,
       department: raw.department,
       forceChangePassword: raw.force_change_password,
@@ -27,11 +27,11 @@ export const UserMapper = {
   toPersistence(user: User): any {
     return {
       id: user.id,
+      person_id: user.personId || null, // Persistência do Golden Record
       name: user.name,
       email: user.email,
       password_hash: user.passwordHash,
       role_id: user.roleId,
-      cpf: user.props.cpf || null,
       job_title: user.props.jobTitle || null,
       department: user.props.department || null,
       force_change_password: user.props.forceChangePassword,
@@ -46,6 +46,7 @@ export const UserMapper = {
   toResponse(user: User): UserResponse {
     return {
       id: user.id!,
+      personId: user.personId, // Exposição na API
       name: user.name,
       email: user.email,
       roleId: user.roleId,

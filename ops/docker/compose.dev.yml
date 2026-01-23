@@ -1,0 +1,28 @@
+# Development Environment Overrides
+include:
+  - compose.infra.yml
+  - compose.yml
+
+services:
+  backend:
+    # Em DEV, usamos o comando de desenvolvimento do Bun
+    command: bun run dev
+    expose:
+      - "3000"
+    volumes:
+      - /app/node_modules
+      # Preserva node_modules dos workspaces contra interferências externas
+      - /app/src/modules/iam/node_modules
+      - /app/src/modules/notifications/node_modules
+      - /app/src/modules/shared/node_modules
+      - /app/src/modules/social/node_modules
+
+  frontend:
+    command: bun run dev
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    volumes:
+      - /app/node_modules

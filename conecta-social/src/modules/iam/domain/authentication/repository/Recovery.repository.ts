@@ -1,13 +1,13 @@
 export interface RecoveryRepository {
   /**
-   * Salva um código de recuperação (OTP) para um e-mail.
+   * Salva um código de recuperação (OTP) para um usuário (via ID).
    */
-  saveRecoveryCode(email: string, code: string, expiresAt: Date): Promise<void>;
+  saveRecoveryCode(userId: string, code: string, expiresAt: Date): Promise<void>;
 
   /**
-   * Busca um código válido (não expirado e não usado) para o e-mail.
+   * Busca um código válido (não expirado e não usado) para o usuário.
    */
-  findValidRecoveryCode(email: string, code: string): Promise<{ id: string } | null>;
+  findValidRecoveryCode(userId: string, code: string): Promise<{ id: string } | null>;
 
   /**
    * Marca um código como utilizado para evitar reuso.

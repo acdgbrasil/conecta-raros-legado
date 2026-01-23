@@ -7,6 +7,12 @@ import { NotificationServer } from "./modules/notifications/infra/http/hono/serv
 // Inicializa a aplicação principal (Gateway)
 const app = new Hono();
 
+// Debug Middleware: Loga URL exata que chega
+app.use('*', async (c, next) => {
+  console.log(`[DEBUG] Incoming: ${c.req.method} ${c.req.path}`);
+  await next();
+});
+
 // Middlewares Globais
 app.use('*', logger());
 app.use('*', cors());

@@ -26,15 +26,16 @@ export class ResetPasswordUseCase implements UseCaseProvider<ResetPasswordInput,
   async execute(input: ResetPasswordInput): Promise<ResetPasswordOutput> {
     const parsedInput = AuthInput.parserResetPassword(input);
     
-    // Valida código primeiro
-    const recoveryCode = await this.recoveryRepository.findValidRecoveryCode(parsedInput.email, parsedInput.code);
-    if(!recoveryCode) {
-      throw new Error("Código de recuperação inválido ou expirado.");
-    }
-
+    // 1. Busca usuário primeiro para obter o ID
     const user = await this.userRepository.findByEmail(parsedInput.email);
     if(!user || !user.isActive) {
       throw new Error("Usuário não encontrado ou inativo.");
+    }
+
+    // 2. Valida o código usando o ID do usuário (Integridade Referencial)
+    const recoveryCode = await this.recoveryRepository.findValidRecoveryCode(user.id!, parsedInput.code);
+    if(!recoveryCode) {
+      throw new Error("Código de recuperação inválido ou expirado.");
     }
 
     const hashedPassword = await Bun.password.hash(parsedInput.newPassword);

@@ -1,0 +1,26 @@
+meta {
+  name: Change Status
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/api/users/{{created_user_id}}/status
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+body:json {
+  {
+    "status": "BLOCKED"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq BLOCKED
+}

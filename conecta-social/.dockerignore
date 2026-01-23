@@ -1,31 +1,18 @@
-# Dependências e Logs
 node_modules
-npm-debug.log
-bun.lockb
-
-# Módulos Desligados (Legado)
-src/modules/social
-
-# Git e IDEs
+Dockerfile*
+docker-compose*
+.dockerignore
 .git
 .gitignore
+README.md
+LICENSE
 .vscode
-.idea
-.cursor
-
-# Documentação e Notas do Projeto
-*.md
-conecta-social.postman_collection.json
-prompt.md
-initProject.sh
-
-# Variáveis de Ambiente
+Makefile
 .env
-.env.local
-example.env
-
-# Docker e Build
-Dockerfile
-.dockerignore
+.editorconfig
+.idea
+coverage*
+# Ignora arquivos de build local
 dist
 build
+.next

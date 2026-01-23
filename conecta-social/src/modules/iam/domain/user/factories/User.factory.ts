@@ -65,9 +65,8 @@ export class User {
    * Atualiza dados cadastrais permitidos.
    * Campos sensíveis ou de controle (role, senha, status) devem usar métodos específicos.
    */
-  public updateDetails(data: Partial<Pick<UserEntity, 'name' | 'cpf' | 'jobTitle' | 'department'>>): void {
+  public updateDetails(data: Partial<Pick<UserEntity, 'name' | 'jobTitle' | 'department'>>): void {
     if (data.name) this.props.name = data.name;
-    if (data.cpf !== undefined) this.props.cpf = data.cpf;
     if (data.jobTitle !== undefined) this.props.jobTitle = data.jobTitle;
     if (data.department !== undefined) this.props.department = data.department;
     
@@ -76,6 +75,7 @@ export class User {
 
   //MARK: Getters
   get id() { return this.props.id; }
+  get personId() { return this.props.personId; }
   get name() { return this.props.name; }
   get email() { return this.props.email; }
   get roleId() { return this.props.roleId; }
