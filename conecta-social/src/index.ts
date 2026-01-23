@@ -1,97 +1,49 @@
-import express from 'express';
-import userRouter from './presenter/routers/userRouter.js';
-import authRouter from './presenter/routers/authRouter.js';
-import { connectionMongose, testConnection } from './infra/database/mongodb/mongoDtos/mongodbDto.js';
-import { MongooseClientSingleton } from './infra/database/mongodb/mongooseClientSingleton.js';
-import { _verifyPassEmailToken, createPassEmailToken, verifyToken } from './infra/jwt/jwtToken.js';
-import admRouter from './presenter/routers/admRouter.js';
-import { deleteUser } from './infra/database/postgress/postgressDTO.js';
-import cors from 'cors';
-import {config} from 'dotenv'
-import { pool } from './infra/database/postgress/postgres.js';
-import { migration_25_05_2025 } from './infra/database/postgress/migrations/postMigrations.js';
-import { downloadRouter } from './presenter/routers/downloadRouter.js';
-import { fileURLToPath } from 'url';
+import { Hono } from "hono";
+import { logger } from "hono/logger";
+import { cors } from "hono/cors";
+import { IamServer } from "./modules/iam/infra/http/hono/server/Iam.server";
+import { NotificationServer } from "./modules/notifications/infra/http/hono/server/Notification.server";
 
-config({});
+// Inicializa a aplicação principal (Gateway)
+const app = new Hono();
 
-const verifyPostGress = (isConnected:boolean, pgClient:any) => {
-    if(!isConnected) {
-        console.log('Postgress is not connected');
-        return;
-    }
-    migration_25_05_2025(pgClient).then((value) => {
-        console.log('Migration completed successfully');
-    }).catch((error) => {
-        console.error('Error during migration:', error);
-    })
-    console.log('Postgress is connected');
-}
-
-const PORT = process.env.PORT || 3000;
-function startDatabase() {
-    pool(10).then(({isConnected, pgClient}) => verifyPostGress(isConnected, pgClient));
-    connectionMongose().then((client) => {
-        MongooseClientSingleton.setInstance(client);
-        testConnection();
-    });
-}
-
-function verifyGetEnviroments(){
-    if(process.env.SUPER_ADM_EMAIL == null || process.env.SUPER_ADM_EMAIL == undefined || process.env.SUPER_ADM_EMAIL == ''){
-        return "FAIL TO LOAD SUPER_ADM_EMAIL";
-    }
-
-    if(process.env.POSTGRES_USER == null || process.env.POSTGRES_USER == undefined || process.env.POSTGRES_USER == ''){
-        return "FAIL TO LOAD POSTGRES_USER";
-    }
-
-    if(process.env.POSTGRES_PASSWORD == null || process.env.POSTGRES_PASSWORD == undefined || process.env.POSTGRES_PASSWORD == ''){
-        return "FAIL TO LOAD POSTGRES_PASSWORD";
-    }
-
-    if(process.env.POSTGRES_HOST == null || process.env.POSTGRES_HOST == undefined || process.env.POSTGRES_HOST == ''){
-        return "FAIL TO LOAD POSTGRES_HOST";
-    }
-
-    if(process.env.POSTGRES_PORT == null || process.env.POSTGRES_PORT == undefined || process.env.POSTGRES_PORT == ''){
-        return "FAIL TO LOAD POSTGRES_PORT";
-    }
-
-    if(process.env.POSTGRES_DB == null || process.env.POSTGRES_DB == undefined || process.env.POSTGRES_DB == ''){
-        return "FAIL TO LOAD POSTGRES_DB";
-    }
-
-    return "ENVIRONMENT VARIABLES LOADED";
-}
-
-async function a(){
-    let b = ["wombaabmow@gmail.com","grouve-animos@gmail.com","jorgelima01@uol.com.br","jorgevictorlima@gmail.com","jorgequaltyassurance@gmail.com","paulloisnevesx@gmail.com",]
-    for await (let i of b){
-        deleteUser(i);
-    }
-}
-const app = express();
-app.use(cors());
-const router = express.Router();
-app.use(express.json());
-app.use(express.urlencoded({extended:true}));
-app.use(router);
-router.get('/downloads',(req,res)=> res.download('app-windows_candidate-0.1.0-v3.msi',(e)=>console.log(e)));
-router.use('/api',authRouter);
-router.use('/api/ping',async (_,res) => {
-    res.send('pong');
+// Debug Middleware: Loga URL exata que chega
+app.use('*', async (c, next) => {
+  console.log(`[DEBUG] Incoming: ${c.req.method} ${c.req.path}`);
+  await next();
 });
 
+// Middlewares Globais
+app.use('*', logger());
+app.use('*', cors());
 
-router.use(verifyToken);
-router.use(userRouter);
-router.use('/api',admRouter);
+// Health Check
+app.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date() }));
 
+console.log("🚀 Inicializando Módulos...");
 
+// --- MÓDULO IAM ---
+// Monta o servidor IAM na rota base /iam (ex: /iam/auth/login)
+// Mas como suas rotas no controller já são /auth/login, talvez você queira na raiz ou /api/iam
+// Vou montar em /api para ficar organizado: /api/auth/login, /api/users
+const iamApp = IamServer();
+app.route('/api', iamApp);
+console.log("✅ Módulo IAM carregado.");
 
-app.listen(PORT,function(){
-    console.log('SERVER RUNNING ON PORT: '+PORT);
-    console.log(verifyGetEnviroments());
-    startDatabase();
-})
+// --- MÓDULO NOTIFICATIONS ---
+// Monta o servidor de notificações (Webhooks, etc)
+const notificationApp = NotificationServer();
+app.route('/api/notifications', notificationApp);
+console.log("✅ Módulo Notifications carregado.");
+
+// --- MÓDULO SOCIAL (Legado/Desligado) ---
+// const socialApp = SocialServer();
+// app.route('/api/social', socialApp);
+console.log("⚠️  Módulo Social está desligado.");
+
+export default {
+  port: process.env.PORT || 3000,
+  fetch: app.fetch,
+};
+
+console.log(`\n🌐 Server is running on port ${process.env.PORT || 3000}`);

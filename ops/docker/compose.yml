@@ -1,0 +1,51 @@
+# Base Application Definitions
+services:
+  backend:
+    build:
+      # Caminho relativo à pasta ops/docker
+      context: ../../conecta-social
+      dockerfile: Dockerfile
+    container_name: conecta-backend
+    restart: always
+    env_file:
+      - ../../conecta-social/.env
+    environment:
+      - POSTGRES_HOST=postgres
+      - PG_USER=${POSTGRES_USER:-postgres}
+      - PG_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - PG_HOST=postgres
+      - PG_PORT=5432
+      - PG_DATABASE=${POSTGRES_DB:-conecta_social}
+      - MONGO_LOCAL_URL=mongodb://mongo:27017/conecta_social
+      - PORT=3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    networks:
+      - conecta-network
+    logging: &default-logging
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  frontend:
+    build:
+      context: ../../conecta-social-front
+      dockerfile: Dockerfile
+    container_name: conecta-frontend
+    restart: always
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:80
+      - INTERNAL_API_URL=http://backend:3000
+    depends_on:
+      - backend
+    networks:
+      - conecta-network
+    logging: *default-logging
+
+networks:
+  conecta-network:
+    driver: bridge

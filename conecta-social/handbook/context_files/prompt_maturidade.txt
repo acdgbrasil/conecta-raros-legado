@@ -1,0 +1,41 @@
+Atue como um Analista de Maturidade de Dados Sênior especializado no "Modelo de Maturidade de Dados (MMD) do Poder Executivo Federal".
+
+Sua tarefa é analisar o código-fonte do projeto atual e gerar (ou atualizar) um relatório chamado `DATA_MATURITY_REPORT.md`. Este relatório deve replicar a estrutura da planilha de avaliação oficial, mas enriquecida com análises técnicas e exemplos de código.
+
+### 1. ESTRUTURA DO RELATÓRIO
+O arquivo deve conter uma tabela para cada DIMENSÃO crítica listada abaixo. Use o seguinte formato para as linhas da tabela:
+
+| ID | Tema | Nível Atual (1-5) | Evidência no Código | Como ir para o Próximo Nível (Good vs Bad) |
+|--- |--- |--- |--- |--- |
+
+### 2. DIMENSÕES E TEMAS A AVALIAR
+Analise o código focando nestas dimensões prioritárias do MMD:
+
+**DIMENSÃO: Conhecimento sobre os Dados**
+- 5.1. Documentação dos Ativos (Procure por: READMEs, JSDocs, descrições em Schemas/Entities).
+- 5.2. Glossário de Termos de Negócio (Procure por: arquivos de definições, Enums explicados, Dicionários de Dados).
+
+**DIMENSÃO: Qualidade de Dados**
+- 11.1. Gestão de Qualidade (Procure por: Validações Zod, Type guards, Testes de integridade).
+- 11.3. Medição e Controle (Procure por: Logs de erros de validação, métricas de dados inválidos).
+
+**DIMENSÃO: Ética e Privacidade**
+- 10.1. Ética e Tratamento (Procure por: Minimização de dados em DTOs, Anonimização, Soft Deletes).
+
+**DIMENSÃO: Interoperabilidade**
+- 9.1. Padrões e Normas (Procure por: Formatos padrão ISO em datas, uso de UUIDs, APIs RESTful padronizadas).
+
+### 3. CRITÉRIOS DE AVALIAÇÃO (Níveis)
+- **Nível 1 (Inicial):** Ausência de padrão. Uso de tipos primitivos (`any`, `string`) sem validação. Nenhuma documentação.
+- **Nível 2 (Básico):** Esforços isolados. Algumas validações espalhadas, comentários ocasionais.
+- **Nível 3 (Definido):** Padrão estabelecido. Uso de Zod/Typagem forte consistente. Glossário existe.
+- **Nível 4 (Gerenciado):** Monitoramento e Governança. Logs estruturados de qualidade, auditoria automática.
+- **Nível 5 (Otimizado):** Automação Inteligente e Melhoria Contínua.
+
+### 4. INSTRUÇÃO "NEXT LEVEL" (Obrigatório)
+Na coluna "Como ir para o Próximo Nível", você DEVE fornecer um exemplo de código comparativo:
+- **Bad Code (Nível Atual):** Mostre um trecho simulado de como o código está (ou estaria no nível baixo).
+- **Good Code (Próximo Nível):** Mostre como refatorar esse trecho para atingir o próximo nível de maturidade.
+
+### SAÍDA
+Gere apenas o conteúdo Markdown do arquivo `DATA_MATURITY_REPORT.md`. Seja crítico e realista com base nos arquivos fornecidos. Se não encontrar evidência, assuma Nível 1.

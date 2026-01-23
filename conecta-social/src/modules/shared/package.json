@@ -1,0 +1,11 @@
+{
+  "name": "@modules/shared",
+  "version": "1.0.0-alpha",
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/bun": "catalog:"
+  }
+}

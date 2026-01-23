@@ -3,28 +3,52 @@ FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
-# Instala todas as dependências (incluindo devDependencies para o build)
+# Instala dependências
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+RUN bun install
 
+# Copia o código fonte
 COPY . .
 
-# Build da aplicação (Gera .output)
+# Desabilita telemetria do Next.js durante o build
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Build da aplicação
 RUN bun run build
 
 # Stage 2: Runner
-FROM oven/bun:1-alpine
+FROM oven/bun:1-alpine AS runner
 
 WORKDIR /app
 
-# Copia os artefatos do build
-COPY --from=builder /app/.output ./.output
-COPY --from=builder /app/package.json ./
-# É crucial copiar o node_modules ou reinstalar as deps de produção para que o comando "start" funcione
-# Como estamos usando Bun, copiar node_modules é rápido e seguro se a arquitetura for a mesma (Alpine -> Alpine)
-COPY --from=builder /app/node_modules ./node_modules
-
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+
+# Cria usuário não-root por segurança
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copia arquivos necessários
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+
+# Copia arquivos fonte e configs para modo DEV
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/tsconfig.json ./
+COPY --from=builder /app/next.config.ts ./
+COPY --from=builder /app/postcss.config.mjs ./
+COPY --from=builder /app/eslint.config.mjs ./
+
+# Define permissões
+RUN chown -R nextjs:nodejs /app
+
+USER nextjs
+
 EXPOSE 3000
 
 CMD ["bun", "run", "start"]

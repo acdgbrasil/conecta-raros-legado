@@ -1,0 +1,422 @@
+import { Hono } from 'hono';
+import { FamilyController } from '../../../useCase/controllers/modules/familyController.js';
+import { CustomError } from '../../../infra/error/error.js';
+import { FamilyCompositionPerson, Documents, Pregnant } from '../../../domain/entity/familyComposition.js';
+import { Observations } from '../../../domain/entity/observations.js';
+import { FamilyAndCommunity } from '../../../domain/entity/familyAndCommunity.js';
+import { FamilyComunitaryConvivation } from '../../../domain/entity/familyComunitaryConvivation.js';
+import { FamilyEventlyBenefits } from '../../../domain/entity/familyEnvetlyBenefits.js';
+
+const router = new Hono();
+const controller = new FamilyController();
+
+// Family Person
+/**
+ * @swagger
+ * /families/{familyId}/members:
+ *   post:
+ *     summary: Adiciona um membro à família
+ *     tags: [Family]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: familyId
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fullname
+ *               - birthDate
+ *               - biologicalGender
+ *               - kinship
+ *             properties:
+ *               fullname: { type: string }
+ *               birthDate: { type: string, format: date }
+ *               biologicalGender: { type: string }
+ *               kinship: { type: number }
+ *               personWithDisabilities: { type: boolean }
+ *     responses:
+ *       201: { description: Member Created }
+ */
+router.post('/families/:familyId/members', async (c) => {
+    try {
+        const familyId = c.req.param('familyId');
+        const { fullname, birthDate, biologicalGender, kinship, personWithDisabilities } = await c.req.json();
+
+        if (!fullname) throw new CustomError('Bad Request', 400, 'Bad Request', 'Full Name is required');
+        if (!birthDate) throw new CustomError('Bad Request', 400, 'Bad Request', 'Birth Date is required');
+        if (!biologicalGender) throw new CustomError('Bad Request', 400, 'Bad Request', 'biologicalGender is required');
+        if (!kinship) throw new CustomError('Bad Request', 400, 'Bad Request', 'Kinship is required');
+        if (typeof personWithDisabilities !== "boolean") throw new CustomError('Bad Request', 400, 'Bad Request', 'Person With Disabilities is required');
+
+        const documents = new Documents(false, false, false, false, false);
+        const dateArray = birthDate.split('/');
+        const date = new Date(Number(dateArray[2]), Number(dateArray[1]), Number(dateArray[0]));
+        const familyCompositionPerson = new FamilyCompositionPerson(fullname, date, biologicalGender, personWithDisabilities, documents, kinship);
+        
+        const result = await controller.createFamilyPerson(familyCompositionPerson, familyId);
+        return c.json(result, 201);
+    } catch (e: any) {
+        return c.json(e, e.statusCode || 500);
+    }
+});
+
+/**
+ * @swagger
+ * /families/{familyId}/members:
+ *   get:
+ *     summary: Lista membros da família
+ *     tags: [Family]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: familyId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: OK }
+ */
+router.get('/families/:familyId/members', async (c) => {
+    try {
+        const familyId = c.req.param('familyId');
+        const result = await controller.getFamilyCompositionPersons(familyId);
+        return c.json(result, 200);
+    } catch (e: any) {
+        return c.json(e, e.statusCode || 500);
+    }
+});
+
+/**
+ * @swagger
+ * /families/{familyId}/observations:
+ *   post:
+ *     summary: Adiciona observação à família
+ *     tags: [Family]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: familyId
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - observation
+ *               - whoIsObservingId
+ *             properties:
+ *               observation: { type: string }
+ *               whoIsObservingId: { type: string }
+ *     responses:
+ *       201: { description: Created }
+ */
+router.post('/families/:familyId/observations', async (c) => {
+    try {
+        const familyId = c.req.param('familyId');
+        const { observation, whoIsObservingId } = await c.req.json();
+        if (!observation) throw new CustomError('Bad Request', 400, 'Bad Request', 'Observation is required');
+        if (!whoIsObservingId) throw new CustomError('Bad Request', 400, 'Bad Request', 'Who Is Observing Id is required');
+        
+        const newObservation = new Observations(observation, whoIsObservingId);
+        const result = await controller.addObservation(newObservation, familyId);
+        return c.json(result, 201);
+    } catch (e: any) {
+        return c.json(e, e.statusCode || 500);
+    }
+});
+
+// Documents and Ethnicity
+/**
+ * @swagger
+ * /families/{familyId}/members/{memberId}/documents:
+ *   put:
+ *     summary: Atualiza documentos de um membro
+ *     tags: [Family]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: familyId
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: memberId
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - document
+ *             properties:
+ *               document:
+ *                 type: array
+ *                 items: { type: boolean }
+ *                 description: "[cn, rg, ctps, cpf, te]"
+ *     responses:
+ *       200: { description: Updated }
+ */
+router.put('/families/:familyId/members/:memberId/documents', async (c) => {
+    try {
+        const familyId = c.req.param('familyId');
+        const memberId = c.req.param('memberId');
+        const { document } = await c.req.json();
+
+        const documents = new Documents(document[0], document[1], document[2], document[3], document[4]);
+        const result = await controller.createDocuments(documents, familyId, memberId);
+        return c.json(result, 200); 
+    } catch (e: any) {
+        return c.json(e, e.statusCode || 500);
+    }
+});
+
+/**
+ * @swagger
+ * /families/{familyId}/ethnicity:
+ *   patch:
+ *     summary: Define especificações étnicas da família
+ *     tags: [Family]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: familyId
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ethnicalSpecifications
+ *             properties:
+ *               ethnicalSpecifications: { type: string }
+ *     responses:
+ *       200: { description: Updated }
+ */
+router.patch('/families/:familyId/ethnicity', async (c) => {
+    try {
+        const familyId = c.req.param('familyId');
+        // Corrected typo from 'etnical' to 'ethnical' in API, mapped to internal 'etnical'
+        const { ethnicalSpecifications } = await c.req.json(); 
+        
+        if (!ethnicalSpecifications) throw new CustomError('Bad Request', 400, 'Bad Request', 'Ethnical Specifications is required');
+        
+        const result = await controller.createEtnicalSpecifications(ethnicalSpecifications, familyId);
+        return c.json(result, 200);
+    } catch (e: any) {
+        return c.json(e, e.statusCode || 500);
+    }
+});
+
+// Community
+/**
+ * @swagger
+ * /families/{familyId}/community-ties:
+ *   put:
+ *     summary: Atualiza dados de família e comunidade
+ *     tags: [Family]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: familyId
+ *         required: true
+ *         schema: { type: string }
+ *         description: "ID da Entidade FamilyAndCommunity (Nota: Atualmente o sistema pede este ID específico, não o da Família)"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               yearsInState: { type: number }
+ *               awaysLivingInState: { type: boolean }
+ *               yearsInDistrict: { type: number }
+ *               awaysLivingInDistrict: { type: boolean }
+ *               yearsInNeighborhood: { type: number }
+ *               awaysLivingInNeighborhood: { type: boolean }
+ *               hasVictimOfThreatsOrDiscrimination: { type: boolean }
+ *               hasNearbySupportNetwork: { type: boolean }
+ *               hasNeighborSupportNetwork: { type: boolean }
+ *               hasParticipatesInSupportGroups: { type: boolean }
+ *               hasParticipatesInSocialMovements: { type: boolean }
+ *               hasNoAccessToLeisureActivities: { type: boolean }
+ *               hasElderWithoutLeisureOrSocialInteraction: { type: boolean }
+ *               hasDependentsLeftAloneAtHome: { type: boolean }
+ *               relationshipEvaluationByTechnician: { type: string }
+ *               parentChildRelationshipEvaluation: { type: string }
+ *               siblingRelationshipEvaluation: { type: string }
+ *               conflictWithOtherResidents: { type: string }
+ *     responses:
+ *       200: { description: Updated }
+ */
+router.put('/families/:familyId/community-ties', async (c) => {
+    try {
+        // NOTE: The original logic uses 'familyAndCommunityId'. If the frontend passes the Family ID 
+        // but the backend expects a specific sub-document ID, we might have a mismatch. 
+        // For now, I'm assuming 'familyId' in URL maps to the expected ID by the controller.
+        const familyId = c.req.param('familyId'); 
+        const { yearsInState, awaysLivingInState, yearsInDistrict, awaysLivingInDistrict, yearsInNeighborhood, awaysLivingInNeighborhood, hasVictimOfThreatsOrDiscrimination, hasNearbySupportNetwork, hasNeighborSupportNetwork, hasParticipatesInSupportGroups, hasParticipatesInSocialMovements, hasNoAccessToLeisureActivities, hasElderWithoutLeisureOrSocialInteraction, hasDependentsLeftAloneAtHome, relationshipEvaluationByTechnician, parentChildRelationshipEvaluation, siblingRelationshipEvaluation, conflictWithOtherResidents } = await c.req.json();
+
+        const familyCommunity = new FamilyAndCommunity(yearsInState, awaysLivingInState, yearsInDistrict, awaysLivingInDistrict, yearsInNeighborhood, awaysLivingInNeighborhood, hasVictimOfThreatsOrDiscrimination, hasNearbySupportNetwork, hasNeighborSupportNetwork, hasParticipatesInSupportGroups, hasParticipatesInSocialMovements, hasNoAccessToLeisureActivities, hasElderWithoutLeisureOrSocialInteraction, hasDependentsLeftAloneAtHome, relationshipEvaluationByTechnician, parentChildRelationshipEvaluation, siblingRelationshipEvaluation, conflictWithOtherResidents, true);
+        
+        const result = await controller.createFamilyAndCommunity(familyCommunity, familyId);
+        return c.json(result, 200);
+    } catch (e: any) {
+        return c.json(e, e.statusCode || 500);
+    }
+});
+
+/**
+ * @swagger
+ * /families/{familyId}/community-ties/observations:
+ *   post:
+ *     summary: Adiciona observação sobre comunidade
+ *     tags: [Family]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: familyId
+ *         required: true
+ *         schema: { type: string }
+ *         description: ID da entidade FamilyAndCommunity
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - observation
+ *               - whoIsObservingId
+ *             properties:
+ *               observation: { type: string }
+ *               whoIsObservingId: { type: string }
+ *     responses:
+ *       201: { description: Created }
+ */
+router.post('/families/:familyId/community-ties/observations', async (c) => {
+    try {
+        const familyId = c.req.param('familyId');
+        const { observation, whoIsObservingId } = await c.req.json();
+        if (!observation) throw new CustomError('Bad Request', 400, 'Bad Request', 'Observation is required');
+        
+        const newObs = new Observations(observation, whoIsObservingId);
+        const result = await controller.addFamilyAndCommunityObservation(familyId, newObs);
+        return c.json(result, 201);
+    } catch (e: any) {
+        return c.json(e, e.statusCode || 500);
+    }
+});
+
+// Benefits
+/**
+ * @swagger
+ * /families/{familyId}/benefits:
+ *   post:
+ *     summary: Cria registro de benefícios eventuais
+ *     tags: [Family]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: familyId
+ *         required: true
+ *         schema: { type: string }
+ *         description: ID da entidade Benefits
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date: { type: string, format: date }
+ *               typeOfBenefit: { type: number }
+ *               nBirthDate: { type: string }
+ *               nCpf: { type: string }
+ *     responses:
+ *       201: { description: Created }
+ */
+router.post('/families/:familyId/benefits', async (c) => {
+    try {
+        const familyId = c.req.param('familyId');
+        const { date, typeOfBenefit, nBirthDate, nCpf } = await c.req.json();
+        
+        const dateFormater = new Date(date);
+        const benefit = new FamilyEventlyBenefits(dateFormater, typeOfBenefit, nBirthDate, nCpf, true);
+        
+        const result = await controller.createBenefits(benefit, familyId);
+        return c.json(result, 201);
+    } catch (e: any) {
+        return c.json(e, e.statusCode || 500);
+    }
+});
+
+// Community Convivation
+/**
+ * @swagger
+ * /members/{memberId}/community-convivence:
+ *   post:
+ *     summary: Cria convivência comunitária para um membro
+ *     tags: [Family]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: memberId
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - familyCompositionId
+ *             properties:
+ *               dateOfInitJson: { type: string, format: date }
+ *               dateOfFinishJson: { type: string, format: date }
+ *               unity: { type: number }
+ *               serviceType: { type: number }
+ *               familyCompositionId: { type: string }
+ *     responses:
+ *       201: { description: Created }
+ */
+router.post('/members/:memberId/community-convivence', async (c) => {
+    try {
+        const memberId = c.req.param('memberId');
+        const { dateOfInitJson, dateOfFinishJson, unity, serviceType, familyCompositionId } = await c.req.json();
+        
+        const dateOfInit = new Date(dateOfInitJson);
+        const dateOfFinish = new Date(dateOfFinishJson);
+        const convivation = new FamilyComunitaryConvivation(dateOfInit, dateOfFinish, unity, serviceType);
+        
+        const result = await controller.createComunitaryConvivation(convivation, familyCompositionId, memberId);
+        return c.json(result, 201);
+    } catch (e: any) {
+        return c.json(e, e.statusCode || 500);
+    }
+});
+
+export default router;

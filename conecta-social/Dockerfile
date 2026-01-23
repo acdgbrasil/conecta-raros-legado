@@ -1,32 +1,24 @@
-# Stage 1: Build
-FROM node:20-alpine AS builder
-
+# use the official Bun image
+FROM oven/bun:1-alpine AS base
 WORKDIR /app
 
-# Install dependencies
-COPY package*.json ./
-RUN npm ci
+# Garante a versão mais recente do Bun para correções no driver SQL
+RUN bun upgrade
 
-# Copy source code
+# Em desenvolvimento, vamos simplificar para garantir que os Workspaces funcionem.
+# Workspaces dependem de symlinks relativos que quebram facilmente em multi-stage complexos.
+
+# 1. Copia tudo primeiro (respeitando .dockerignore)
 COPY . .
 
-# Build the application
-RUN npm run build
+# 2. Garante que não há node_modules antigos e instala do zero
+RUN rm -rf node_modules src/modules/*/node_modules && bun install
 
-# Stage 2: Production
-FROM node:20-alpine
+# Variáveis de ambiente
+ENV NODE_ENV=development
+ENV PORT=3000
 
-WORKDIR /app
+EXPOSE 3000/tcp
 
-COPY package*.json ./
-RUN npm ci --only=production
-
-COPY --from=builder /app/build ./build
-# We also need the .env file if not provided strictly by docker-compose environment mapping, 
-# but docker-compose usually handles the env vars. 
-# Copying static assets if they are needed by path resolution relative to root
-# (Though the code seems to look relative to __filename which is in build/)
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
+# O comando 'dev' é o padrão
+CMD [ "bun", "run", "dev" ]

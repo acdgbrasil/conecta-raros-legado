@@ -1,43 +1,73 @@
 {
-  "name": "project-amn",
-  "version": "1.0.0",
-  "description": "",
+  "name": "conecta-social-api",
+  "version": "1.0.0-alpha.1",
+  "description": "API Modular (IAM, Notifications, Social) utilizando Clean Architecture e Hono.",
   "type": "module",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx swc src -d build",
-    "dev": "npx nodemon",
-    "start": "node build/src/index.js",
-    "start_server_watch": "pm2 start npx --name conecta-raros-v1 -- ts-node src/index.ts",
-    "docker_init": "npx prisma migrate deploy && npm run build && npx prisma generate && npm run start"
+  "main": "src/index.ts",
+  "modules_version": {
+    "iam": "1.0.0-alpha",
+    "notifications": "1.0.0-alpha",
+    "social": "0.0.0-legacy",
+    "shared": "1.0.0-alpha"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@swc/cli": "^0.7.7",
-    "@swc/core": "^1.12.7",
-    "@types/cors": "^2.8.19",
-    "@types/jsonwebtoken": "^9.0.6",
-    "@types/multer": "^2.0.0",
-    "@types/node": "^25.0.9",
-    "@types/pg": "^8.15.4",
-    "esbuild": "^0.27.2",
-    "typescript": "^5.2.2"
-  },
-  "dependencies": {
+  "workspaces": [
+    "src/modules/*"
+  ],
+  "catalog": {
     "@sendgrid/mail": "^8.1.3",
     "@types/bcrypt": "^6.0.0",
-    "@types/express": "^5.0.6",
     "bcrypt": "^6.0.0",
-    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
-    "express": "^5.2.1",
+    "hono": "^4.11.4",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^9.1.3",
-    "multer": "^2.0.2",
-    "pg": "^8.16.2",
-    "resend": "^6.7.0"
+    "resend": "^6.7.0",
+    "swagger-jsdoc": "^6.2.8",
+    "zod": "^4.3.5",
+    "@types/bun": "^1.3.6",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^25.0.9",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "dev:hot": "bun --hot src/index.ts",
+    "start": "bun src/index.ts",
+    "test": "bun test",
+    "migrate:iam": "bun src/modules/shared/infra/postgres/migrations/iam.migration.ts",
+    "migrate:notifications": "bun src/modules/shared/infra/postgres/migrations/notification.migration.ts",
+    "seed:iam": "bun src/modules/shared/infra/postgres/migrations/seed.migration.ts",
+    "docker:up": "docker-compose up -d --build",
+    "maturity:check": "gemini -c context_files/ --prompt prompt_maturidade.txt > handbook/reports/DATA_MATURITY_REPORT.md"
+  },
+  "keywords": [
+    "clean-architecture",
+    "iam",
+    "notifications",
+    "hono",
+    "bun"
+  ],
+  "author": "Conecta Social Team",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "@types/jsonwebtoken": "catalog:",
+    "@types/node": "catalog:",
+    "@types/swagger-jsdoc": "catalog:",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "catalog:",
+    "@types/bcrypt": "catalog:",
+    "bcrypt": "catalog:",
+    "dotenv": "catalog:",
+    "hono": "catalog:",
+    "hono-zod-openapi": "^1.0.1",
+    "jsonwebtoken": "catalog:",
+    "mongoose": "catalog:",
+    "resend": "catalog:",
+    "swagger-jsdoc": "catalog:",
+    "zod": "catalog:"
   }
 }

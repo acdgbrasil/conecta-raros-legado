@@ -1,0 +1,21 @@
+# bunfig.toml
+# Documentation: https://bun.sh/docs/runtime/bunfig
+
+telemetry = false
+
+[install]
+# Link workspaces packages to node_modules
+linkWorkspacePackages = true
+# Install peer dependencies
+peer = true
+# Use a text-based lockfile for better git diffs
+saveTextLockfile = true
+
+[run]
+# Use bun as the runner for scripts
+bun = true
+
+[test]
+# Test runner configuration
+root = "."
+coverage = false

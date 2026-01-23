@@ -1,0 +1,23 @@
+{
+  "name": "@modules/social",
+  "version": "0.0.0-legacy",
+  "description": "⚠️ MÓDULO DESATIVADO/QUEBRADO. Legado complexo em refatoração lenta. NÃO USE EM PRODUÇÃO.",
+  "dependencies": {
+    "hono": "catalog:",
+    "mongoose": "catalog:",
+    "resend": "catalog:",
+    "dotenv": "catalog:",
+    "@sendgrid/mail": "catalog:",
+    "bcrypt": "catalog:",
+    "swagger-jsdoc": "catalog:",
+    "jsonwebtoken": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/bcrypt": "catalog:",
+    "@types/jsonwebtoken": "catalog:",
+    "@types/node": "catalog:",
+    "@types/swagger-jsdoc": "catalog:"
+  }
+}

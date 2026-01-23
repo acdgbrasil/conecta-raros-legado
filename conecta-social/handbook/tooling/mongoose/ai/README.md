@@ -1,0 +1,26 @@
+# Mongoose AI Docs (English, LLM-Optimized)
+
+This version is optimized for LLM consumption: concise, structured, and example-first.
+
+## Contents
+- [1. 00 - Overview and Conventions](chapters/00-overview.md)
+- [2. 01 - Quickstart](chapters/01-quickstart.md)
+- [3. 02 - Connections and Topology](chapters/02-connections-and-topology.md)
+- [4. 03 - Schemas and Types](chapters/03-schemas-and-types.md)
+- [5. 04 - Documents and Subdocuments](chapters/04-documents-and-subdocs.md)
+- [6. 05 - Queries and Casting](chapters/05-queries-and-casting.md)
+- [7. 06 - Validation and Middleware](chapters/06-validation-and-middleware.md)
+- [8. 07 - Populate and Relations](chapters/07-populate-and-relations.md)
+- [9. 08 - Advanced Modeling](chapters/08-advanced-modeling.md)
+- [10. 09 - Plugins, Transactions, Change Streams](chapters/09-plugins-transactions-change-streams.md)
+- [11. 10 - Performance and Security](chapters/10-performance-and-security.md)
+- [12. 11 - TypeScript and Testing](chapters/11-typescript-and-testing.md)
+- [13. 12 - Deployment, Compatibility, and Migrations](chapters/12-deployment-compat-migrations.md)
+- [14. 13 - Troubleshooting and FAQ](chapters/13-troubleshooting-and-faq.md)
+- [15. 14 - Further Reading and References](chapters/14-further-reading.md)
+- [16. 15 - Aggregations](chapters/15-aggregations.md)
+- [17. 16 - Performance, Indexes, and Observability](chapters/16-performance-observability.md)
+- [18. 17 - Security, Multi-tenant, and Ops](chapters/17-security-multitenant-ops.md)
+- [19. 18 - Data Migrations](chapters/18-data-migrations.md)
+- [20. 19 - Architecture and Agent Guide](chapters/19-architecture-and-agents.md)
+- [21. 20 - Quick Reference and Checklists](chapters/20-quick-reference-checklists.md)
