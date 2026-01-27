@@ -27,6 +27,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-conecta_social}
+    ports:
+      - "5432:5432"
     expose:
       - "5432"
     volumes:
@@ -46,6 +48,8 @@ services:
     container_name: conecta-mongo
     restart: always
     command: ["mongod", "--quiet", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
     expose:
       - "27017"
     volumes:
