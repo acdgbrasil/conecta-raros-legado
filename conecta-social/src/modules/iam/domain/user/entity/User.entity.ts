@@ -2,12 +2,18 @@ import { z } from "zod";
 import "hono-zod-openapi";
 
 export const UserSchema = z.object({
-  id: z.string().uuid().optional()
+  id: z.uuid({
+    version: "v7",
+    error: "id deve ser um UUID v7 válido",
+  }).optional()
     .meta({ 
       description: "Identificador único ordenável (UUID v7) do usuário",
       example: "018e9c32-1b0e-7447-8a62-7231d1b12345" 
     }),
-  personId: z.string().uuid().optional()
+  personId: z.uuid({
+    version: "v7",
+    error: "personId deve ser um UUID v7 válido",
+  }).optional()
     .meta({ 
       description: "Identificador único (Golden Record) para integração entre Bounded Contexts",
       example: "018e9c32-1b0e-7447-8a62-7231d1b12345" 
@@ -17,7 +23,7 @@ export const UserSchema = z.object({
       description: "Nome completo do usuário",
       example: "João da Silva" 
     }),
-  email: z.string().email({ error: "Formato de e-mail inválido" })
+  email: z.email({ error: "Formato de e-mail inválido" })
     .meta({ 
       description: "E-mail institucional único",
       example: "joao.silva@envolve.com.br" 
@@ -27,7 +33,10 @@ export const UserSchema = z.object({
       description: "Hash da senha (BCrypt) para armazenamento seguro",
       example: "$2b$10$K... (hash truncado)" 
     }),
-  roleId: z.string().uuid({ error: "ID do cargo inválido" })
+  roleId: z.uuid({
+    version: "v7",
+    error: "roleId deve ser um UUID v7 válido",
+  })
     .meta({ 
       description: "ID de referência para o cargo/permissão (UUID v7)",
       example: "018e9c32-1b0e-7447-8a62-7231d1b12345" 
@@ -60,9 +69,12 @@ export const UserSchema = z.object({
       example: true 
     }),
 
-  createdBy: z.string().uuid().optional()
+  createdBy: z.uuid({
+    version: "v7",
+  }).optional()
     .meta({ 
-      description: "UUID v7 do administrador que criou o registro" 
+      description: "UUID v7 do administrador que criou o registro",
+      example: "018e9c32-1b0e-7447-8a62-7231d1b12345"
     }),
   lastLoginAt: z.date().optional()
     .meta({ 
