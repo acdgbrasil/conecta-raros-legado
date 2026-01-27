@@ -23,9 +23,9 @@ assert {
 }
 
 script:post-response {
-  // Salva o token na variável de ambiente para as próximas requisições
-  bru.setEnvVar("jwt_token", res.body.token);
-  bru.setEnvVar("refresh_token", res.body.refreshToken);
+  const body = res.getBody()
+  bru.setVar("jwt_token",body.accessToken)
+  bru.setVar("refresh_token",body.refreshToken)
 }
 
 tests {

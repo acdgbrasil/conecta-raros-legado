@@ -1,44 +1,46 @@
 # Relatório de Auditoria e Testes
 
-**Data:** 18 de Janeiro de 2026
-**Status do Sistema:** 🔴 CRÍTICO (Servidor Backend Inoperante)
+**Data Original:** 18 de Janeiro de 2026
+**Última Atualização:** 27 de Janeiro de 2026
+**Status do Sistema:** 🟢 **OPERACIONAL** (Resolvido)
 
-## 1. Resumo dos Testes
+> **Nota de Atualização (27/01/2026):**
+> Todos os problemas críticos listados abaixo foram resolvidos com a refatoração da infraestrutura (`ops/`), atualização dos bancos de dados (Postgres 18, Mongo 8) e correções nos Dockerfiles. O backend agora inicia corretamente e o ambiente de desenvolvimento está estável.
+
+---
+
+## 1. Resumo dos Testes (Histórico)
 A bateria de testes automatizados (`audit_tests.sh`) falhou completamente devido à indisponibilidade do backend.
 
-*   **Health Check (`GET /api/ping`):** Falha (502 Bad Gateway)
-*   **Autenticação (`POST /auth/register`, `/auth/login`):** Falha (502 Bad Gateway)
-*   **Rotas Protegidas:** Não testadas (Token não gerado)
+*   **Health Check (`GET /api/ping`):** Falha (502 Bad Gateway) -> **RESOLVIDO**
+*   **Autenticação (`POST /auth/register`, `/auth/login`):** Falha (502 Bad Gateway) -> **RESOLVIDO**
+*   **Rotas Protegidas:** Não testadas (Token não gerado) -> **RESOLVIDO**
 
-## 2. Diagnóstico de Falhas
+## 2. Diagnóstico de Falhas (Resolvido)
 
 ### 2.1. Backend Crashing (Erro de Sintaxe)
-O servidor backend entra em loop de reinicialização devido a um erro de sintaxe introduzido no arquivo `src/infra/jwt/jwtToken.ts`.
-*   **Erro:** `error: Unexpected export`
-*   **Localização:** Linha 31.
-*   **Causa:** Durante uma tentativa de adicionar logs de depuração, o corpo da função `_verifyToken` foi substituído incorretamente por um comentário `// ...` literal e o fechamento da função foi perdido, quebrando a estrutura do arquivo.
-*   **Impacto:** O arquivo é importado pelo `src/index.ts` (mesmo que não utilizado na lógica principal), impedindo o startup do Bun.
+*   **Status:** ✅ Resolvido.
+*   **Solução:** O arquivo `src/infra/jwt/jwtToken.ts` foi substituído/corrigido e o Dockerfile agora copia corretamente a pasta `src` para resolver dependências de workspace.
 
 ### 2.2. Violação de Arquitetura (UserManagement)
-A análise estática do código revelou que a migração para a arquitetura isolada (`AuthService`) está incompleta.
-*   **Problema:** O controlador `src/useCase/controllers/modules/userManagementController.ts` ainda importa e utiliza `DatabaseService` diretamente para criar usuários (`this.db.create`).
-*   **Impacto:** Viola o princípio de isolamento. O `DatabaseService` (que deveria ser focado em Mongo) ainda mantém métodos "mortos-vivos" ou duplicados para lidar com Postgres (`create`, `findByEmail`), criando acoplamento desnecessário e confusão sobre qual é a "fonte da verdade" para operações de usuário.
+*   **Status:** 🔄 Em Progresso / Mitigado.
+*   **Obs:** A infraestrutura agora suporta a execução correta, permitindo que a refatoração de código continue sem bloqueios de ambiente.
 
 ### 2.3. Código Morto e Imports Desnecessários
-*   **`src/index.ts`:** Importa `verifyToken` de `src/infra/jwt/jwtToken.ts`, mas utiliza `AuthLib.middleware`. Esse import desnecessário é justamente o vetor que causa o crash da aplicação (devido ao erro de sintaxe no arquivo importado).
-*   **`src/infra/database/databaseService.ts`:** Mantém interfaces e implementações de `AuthRepository` e `AdmRepository` que deveriam ter sido removidas ou segregadas para o `AuthService`.
+*   **Status:** ✅ Resolvido.
+*   **Solução:** Limpeza realizada durante a migração para Bun Workspaces.
 
-### 2.4. Inconsistência de Variáveis de Ambiente (Observado anteriormente)
-*   Antes do crash, observou-se que o token JWT gerado no login era considerado inválido na verificação.
-*   **Hipótese:** Descompasso entre a variável `JWT_PASS_KEY` carregada pelo processo de login e a carregada pelo middleware de verificação, possivelmente devido ao cache de container Docker vs. arquivo `.env` local. A chave no container (`env` command) era diferente da chave no arquivo `.env` escrito.
+### 2.4. Inconsistência de Variáveis de Ambiente
+*   **Status:** ✅ Resolvido.
+*   **Solução:** O novo `ops/docker/compose.yml` mapeia explicitamente as variáveis `PG_*` e `MONGO_*`, eliminando a ambiguidade entre `.env` local e cache do Docker.
 
-## 3. Recomendações de Correção (Não aplicadas nesta etapa)
+## 3. Recomendações de Correção (Aplicadas)
 
-1.  **Corrigir Sintaxe:** Restaurar ou corrigir `src/infra/jwt/jwtToken.ts`. Alternativamente, remover o arquivo se ele for obsoleto (substituído por `AuthLib`).
-2.  **Limpar Imports:** Remover `import { verifyToken } ...` de `src/index.ts`.
-3.  **Completar Migração:** Refatorar `UserManagementController` para usar `AuthService` em vez de `DatabaseService`.
-4.  **Limpeza de DatabaseService:** Remover métodos de Auth/User do `DatabaseService` para garantir que ele gerencie apenas o MongoDB.
-5.  **Sincronização de Env:** Garantir que o `docker-compose` esteja passando as variáveis de ambiente corretas (forçar recriação de containers).
+1.  **Corrigir Sintaxe:** ✅ Feito.
+2.  **Limpar Imports:** ✅ Feito.
+3.  **Completar Migração:** 🔄 Em andamento.
+4.  **Limpeza de DatabaseService:** 🔄 Em andamento.
+5.  **Sincronização de Env:** ✅ Feito (Docker Compose refatorado).
 
-## 4. Conclusão
-O sistema está atualmente inoperante. A estratégia de isolamento foi iniciada com sucesso (criação de `AuthLib` e `AuthService`), mas a limpeza pós-migração e a refatoração dos controladores legados não foram concluídas, levando a um estado inconsistente e quebrado.
+## 4. Conclusão Atualizada
+O sistema saiu do estado inoperante. A infraestrutura foi modernizada (DevOps 2.0) e o ambiente de desenvolvimento agora é robusto (`make dev`), permitindo que a equipe foque na lógica de negócio e na finalização da migração arquitetural.
