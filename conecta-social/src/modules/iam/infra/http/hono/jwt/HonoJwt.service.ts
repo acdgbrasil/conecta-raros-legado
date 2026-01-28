@@ -1,5 +1,6 @@
 import { decode, sign, verify } from "hono/jwt";
 import { JwtPayload, JwtProvider } from "../../../../../shared/providers/jwt/Jwt.provider";
+import { getSecret } from "../../../../../shared/infra/config/secrets";
 
 
 export class HonoJwtService implements JwtProvider {
@@ -7,7 +8,7 @@ export class HonoJwtService implements JwtProvider {
   private readonly alg = 'HS256';
 
   constructor(){
-    this.secret = process.env.JWT_SECRET || 'DEFAULT_SECRET_CHANGE_ME';
+    this.secret = getSecret('JWT_SECRET', 'DEFAULT_SECRET_CHANGE_ME');
     if (this.secret === 'DEFAULT_SECRET_CHANGE_ME') {
       if (process.env.NODE_ENV === 'production') {
         throw new Error('❌ [FATAL] JWT_SECRET não configurado em ambiente de produção!');

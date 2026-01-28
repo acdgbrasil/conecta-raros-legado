@@ -21,7 +21,8 @@ export async function loginAction(props: AuthModel) {
     });
 
     return response.user;
-  } catch (error: any) {
-    throw new Error(error.message || "Falha na autenticação");
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Falha na autenticação";
+    throw new Error(message);
   }
 }
