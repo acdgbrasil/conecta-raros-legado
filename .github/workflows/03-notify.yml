@@ -1,0 +1,33 @@
+name: 📣 Notify Discord
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    name: 📢 Send Notification
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔐 Get Discord Webhook (Bitwarden)
+        uses: bitwarden/sm-action@v1
+        with:
+          access_token: ${{ secrets.BW_ACCESS_TOKEN }}
+          base_url: https://vault.bitwarden.com
+          secrets: |
+            <ID_DISCORD_WEBHOOK> > DISCORD_WEBHOOK_URL
+
+      - name: 🚀 Discord Notification
+        uses: sarisia/actions-status-discord@v1
+        if: always()
+        with:
+          webhook: ${{ env.DISCORD_WEBHOOK_URL }}
+          title: "🚀 Nova Versão Publicada: ${{ github.event.release.tag_name }}"
+          description: |
+            **O que mudou:**
+            ${{ github.event.release.body }}
+            
+            [Ver no GitHub](${{ github.event.release.html_url }})
+          color: 0x00ff00
+          username: Conecta Bot
+          avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png

@@ -1,0 +1,91 @@
+name: 🛡️ PR Gatekeeper
+
+on:
+  pull_request:
+    branches: [ "main", "develop" ]
+    types: [opened, synchronize, reopened]
+
+# Concorrência: Cancela builds antigos se você der push novo na mesma branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ------------------------------------------------------------------
+  # 1. Quality Gate (Testes, Lint, Build Check)
+  # ------------------------------------------------------------------
+  quality-check:
+    name: 🧪 Quality Gate (Lint/Test)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🥟 Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      # Cache para acelerar instalação
+      - name: 📦 Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+            */node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: 🔧 Install Dependencies
+        run: bun install --frozen-lockfile
+
+      # Aqui usamos sua pipeline interna poderosa!
+      # Ela já roda Lint, Build Check e Testes de Integração
+      - name: 🛡️ Run Internal Pipeline
+        run: |
+          chmod +x ops/scripts/internal_pipeline.sh
+          # Força modo não-interativo se necessário
+          ./ops/scripts/internal_pipeline.sh
+
+  # ------------------------------------------------------------------
+  # 2. Security Audit (Trivy)
+  # ------------------------------------------------------------------
+  security-audit:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    needs: quality-check # Só roda se o código estiver estável
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🕵️ Run Trivy Vulnerability Scanner (FS)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          ignore-unfixed: true
+          format: 'table'
+          exit-code: '0' # Não quebra a pipeline (por enquanto), apenas reporta
+          severity: 'CRITICAL,HIGH'
+
+      # Gera relatório JSON para o Portal de Transparência futuro
+      - name: 📝 Generate Security Report (JSON)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'json'
+          output: 'security-report.json'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
+
+      - name: 📤 Upload Security Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: security-report.json
+          retention-days: 5
