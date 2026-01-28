@@ -9,7 +9,7 @@ export interface User {
     email: string;
     crm: string | null;
     role: UserRole;
-    isActive:Boolean
+    isActive: boolean
     createdAt: Date;
     updatedAt: Date;
 }

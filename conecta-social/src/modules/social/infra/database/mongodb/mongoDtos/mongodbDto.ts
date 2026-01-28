@@ -2,17 +2,25 @@ import mongoose from "mongoose";
 import { MongooseClientSingleton } from "../mongooseClientSingleton.js";
 import { CodeModel } from "../mongoModels.js";
 import { config } from 'dotenv';
+import { getSecret } from "../../../shared/infra/config/secrets.js";
 config();
 
 export const connectionMongose = async () => {
     try {
+        const mongoUrl = getSecret('MONGO_LOCAL_URL', process.env.MONGO_LOCAL_URL);
+        const mongoUser = getSecret('MONGO_USER');
+        const mongoPass = getSecret('MONGO_PASSWORD');
 
-        if(process.env.MONGO_LOCAL_URL == null || process.env.MONGO_LOCAL_URL == undefined || process.env.MONGO_LOCAL_URL == ''){
+        if(!mongoUrl){
             console.log('FAIL TO LOAD MONGO_LOCAL_URL');
             throw new Error('FAIL TO LOAD MONGO_LOCAL_URL');
         }
 
-        const client = await mongoose.connect(process.env.MONGO_LOCAL_URL);
+        const options: mongoose.ConnectOptions = {};
+        if (mongoUser) options.user = mongoUser;
+        if (mongoPass) options.pass = mongoPass;
+
+        const client = await mongoose.connect(mongoUrl, options);
         return client;
     } catch (error) {
         console.log('Error to connect MongoDB', error);

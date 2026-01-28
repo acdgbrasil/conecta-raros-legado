@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { loginAction } from "../actions/auth.actions";
 import { AuthService } from "../service/auth.service";
 
 export enum AuthViewModelStatus {
@@ -22,9 +21,10 @@ export function useAuthViewModel() {
       await authService.Login({ email, password });
       setStatus(AuthViewModelStatus.SUCCESS);
       return
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Erro desconhecido";
       setStatus(AuthViewModelStatus.ERROR);
-      setErrorMessage(error.message || "Erro desconhecido");
+      setErrorMessage(message);
     }
   };
 

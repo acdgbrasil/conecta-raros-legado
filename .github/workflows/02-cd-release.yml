@@ -1,0 +1,194 @@
+name: 🚀 CD Release & Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+concurrency: production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ------------------------------------------------------------------
+  # 1. Semantic Release (Versionamento)
+  # ------------------------------------------------------------------
+  release:
+    name: 📦 Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Para criar tag/release
+      issues: write
+      pull-requests: write
+    outputs:
+      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
+      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necessário para histórico de commits
+
+      - name: 🚀 Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          semantic_version: 19
+          branches: |
+            [
+              '+([0-9])?(.{+([0-9]),x}).x',
+              'main',
+              'next',
+              'next-major',
+              {name: 'beta', prerelease: true},
+              {name: 'alpha', prerelease: true}
+            ]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ------------------------------------------------------------------
+  # 2. Docker Build & Push
+  # ------------------------------------------------------------------
+  docker:
+    name: 🐳 Docker Build & Push
+    needs: release
+    if: needs.release.outputs.new_release_published == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Para subir no GHCR
+      attestations: write
+      id-token: write
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      # Bitwarden Secrets (Opcional aqui, se precisar de secrets de build)
+      # - name: 🔐 Get Build Secrets
+      #   uses: bitwarden/sm-action@v1
+      #   with:
+      #     access_token: ${{ secrets.BW_ACCESS_TOKEN }}
+      #     base_url: https://vault.bitwarden.com
+      #     secrets: |
+      #       <ID_DO_SEGREDO> > ENV_VAR_NAME
+
+      - name: 🔑 Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏗️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Backend Build
+      - name: 📦 Build/Push Backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./conecta-social
+          file: ./conecta-social/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend:${{ needs.release.outputs.new_release_version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Frontend Build
+      - name: 📦 Build/Push Frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./conecta-social-front
+          file: ./conecta-social-front/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:${{ needs.release.outputs.new_release_version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ------------------------------------------------------------------
+  # 3. Update Transparency Portal (Dados para o Front)
+  # ------------------------------------------------------------------
+  update-transparency:
+    name: 📊 Update Transparency Data
+    needs: [release, docker]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: 🥟 Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      # Baixa o relatório de segurança gerado no workflow anterior (se houver)
+      # Nota: Em arquitetura real, o artifact precisa ser passado entre workflows ou gerado de novo.
+      # Para simplificar, vamos rodar o script que lida com a ausência do relatório gracefully.
+
+      - name: 📝 Generate Transparency JSON
+        run: |
+          mkdir -p conecta-social-front/public/data
+          bun ops/scripts/generate_transparency.ts
+
+      - name: 💾 Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: update transparency data [skip ci]"
+          file_pattern: conecta-social-front/public/data/transparency.json
+
+  # ------------------------------------------------------------------
+  # 4. Deploy to VPS (SSH)
+  # ------------------------------------------------------------------
+  deploy:
+    name: 🚀 Deploy to Production
+    needs: [release, docker]
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: 📥 Checkout (Ops Scripts)
+        uses: actions/checkout@v4
+      
+      - name: 🔐 Get Deploy Secrets (Bitwarden)
+        uses: bitwarden/sm-action@v1
+        with:
+          access_token: ${{ secrets.BW_ACCESS_TOKEN }}
+          base_url: https://vault.bitwarden.com
+          # Mapeie os IDs dos seus segredos do Bitwarden aqui
+          # Exemplo: "uuid-do-host > VPS_HOST"
+          secrets: |
+            <ID_VPS_HOST> > VPS_HOST
+            <ID_VPS_USER> > VPS_USER
+            <ID_VPS_KEY> > VPS_SSH_KEY
+
+      - name: 🚚 Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_USER }}
+          key: ${{ env.VPS_SSH_KEY }}
+          script: |
+            echo "🚀 Iniciando Deploy v${{ needs.release.outputs.new_release_version }}..."
+            cd /opt/conecta-social
+            
+            # Login no Registry (necessário no servidor)
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Atualiza imagens
+            docker compose -f ops/docker/compose.prod.yml pull
+            
+            # Sobe versão nova (Zero Downtime se possível)
+            APP_VERSION=${{ needs.release.outputs.new_release_version }} docker compose -f ops/docker/compose.prod.yml up -d
+            
+            echo "✅ Deploy concluído!"

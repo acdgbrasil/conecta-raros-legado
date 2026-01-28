@@ -1,0 +1,25 @@
+,,
+,,
+,,
+,,
+,,
+,,
+,,Avaliação de Maturidade de Dados 
+,,1.Introdução
+,,"A maturidade de dados de uma instituição - sua capacidade, eficácia e prontidão para usar dados - é fundamental para alcançar as prioridades estratégicas, operacionais e corporativas.Este documento fornece espaço para registrar os níveis de maturidade atuais sobre dimensões e temas relacionados a Governança e Gerenciamento de Dados."
+,,2.Como usar a planilha
+,,
+,,"Na Guia '2.Níveis' é possível indicar o nível de maturidade para cada tema das dimensões. Basta selecionar o nível de maturidade atual da instituição para o tema utilizando o menu suspenso da coluna ""Nível de Maturidade"". Os campos com asterisco (*) são de preenchimento obrigatório.O campo de observação é opcional e é de livre preenchimento. Por meio desse campo é possível descrever como o tema é tratado na instituição, podendo ser descritos os desafios enfrentados, as iniciativas em curso ou previstas, entre outros."
+,,
+,,"Existe a opção de nível de maturidade ""0 – NÃO SE APLICA"", que deve ser selecionada quando o avaliador identificar que a abordagem avaliada não se aplica ao Tema ou à Dimensão em questão.
+Exemplo: ao avaliar o Tema Gerenciamento de dados geoespaciais, da Dimensão Gerenciamento de Dados, e a instituição não operar, produzir ou consumir dados georreferenciados, a opção ""0 – NÃO SE APLICA"" deve ser utilizada."
+,,
+,,
+,,O radar englobando todas as dimensões e temas poderá ser visto na Guia '3.Radar Geral'. A Guia é atualizada automaticamente à medida que os níveis de maturidade são selecionados no menu suspenso.
+,,
+,,Os radares de maturidade por tema e dimensão poderão ser vistos na Guia '4.Radar Temático'. A Guia é atualizada automaticamente à medida que os níveis de maturidade são selecionados no menu suspenso.
+,,
+,,A Guia '5.Dados' é utilizada para exportar os dados para os painéis de BI da SGD e não pode ser alterada.
+,,"Contato: 
+Departamento de Infraestrutura de Dados
+sgd@gestao.gov.br"

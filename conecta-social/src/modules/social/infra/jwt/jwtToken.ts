@@ -1,12 +1,13 @@
 import { sign, verify } from 'hono/jwt';
 import { JWTPayload } from 'hono/utils/jwt/types';
+import { getSecret } from '../../../shared/infra/config/secrets';
 
 export class JwtToken {
   private readonly secret: string;
   private readonly alg: string = 'HS256';
 
   constructor() {
-    this.secret = process.env.JWT_SECRET || 'CHANGE_ME_IN_PROD_PLEASE';
+    this.secret = getSecret('JWT_SECRET', 'CHANGE_ME_IN_PROD_PLEASE');
   }
 
   /**

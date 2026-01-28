@@ -1,0 +1,26 @@
+# Configuração de IDs do Bitwarden Secrets Manager
+# Copie este arquivo para 'bitwarden.ids' e preencha com os UUIDs dos seus segredos.
+
+# ==========================================
+# 1. PRODUÇÃO (PROD)
+# Uso: docker compose -f ops/docker/compose.prod.yml up -d
+# ==========================================
+BWS_ID_PROD_POSTGRES_PASSWORD="insira-o-uuid-aqui"
+BWS_ID_PROD_MONGO_PASSWORD="insira-o-uuid-aqui"
+BWS_ID_PROD_JWT_SECRET="insira-o-uuid-aqui"
+
+# ==========================================
+# 2. HOMOLOGAÇÃO (HOMOLOG)
+# Uso: docker compose -f ops/docker/compose.homolog.yml up -d
+# ==========================================
+BWS_ID_HOMOLOG_POSTGRES_PASSWORD="insira-o-uuid-aqui"
+BWS_ID_HOMOLOG_MONGO_PASSWORD="insira-o-uuid-aqui"
+BWS_ID_HOMOLOG_JWT_SECRET="insira-o-uuid-aqui"
+
+# ==========================================
+# 3. DESENVOLVIMENTO (DEV)
+# Uso: docker compose -f ops/docker/compose.dev.yml (ou local/simulate)
+# ==========================================
+BWS_ID_DEV_POSTGRES_PASSWORD="insira-o-uuid-aqui"
+BWS_ID_DEV_MONGO_PASSWORD="insira-o-uuid-aqui"
+BWS_ID_DEV_JWT_SECRET="insira-o-uuid-aqui"

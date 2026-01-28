@@ -42,3 +42,4 @@ Thumbs.db
 # Project specific (Data volumes mapped in docker-compose)
 postgres_data/
 mongo_data/
+\n# Docker Secrets\nops/docker/secrets/*\n!ops/docker/secrets/.gitkeep

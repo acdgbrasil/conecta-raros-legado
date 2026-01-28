@@ -1,0 +1,65 @@
+# Cenario 4: CI/CD (Pipeline de Automação)
+# Otimizado para velocidade e dados efêmeros.
+# NÃO inclui compose.infra.yml para evitar conflitos de volumes com tmpfs.
+
+include:
+  - compose.yml
+
+services:
+  # --- Bancos de Dados Efêmeros (RAM) ---
+  postgres:
+    image: postgres:18-alpine
+    container_name: conecta-postgres-ci
+    tmpfs:
+      - /var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: conecta_social
+      POSTGRES_HOST_AUTH_METHOD: trust
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - conecta-network
+
+  mongo:
+    image: mongo:8.0
+    container_name: conecta-mongo-ci
+    tmpfs:
+      - /data/db
+    command: ["mongod", "--quiet", "--bind_ip_all"]
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'db.runCommand(\"ping\").ok' | mongosh localhost:27017/test --quiet"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - conecta-network
+
+  # --- Aplicação ---
+  backend:
+    ports:
+      - "3000:3000" # Expõe para o host rodar os testes
+    environment:
+      - NODE_ENV=test
+      - WATCHPACK_POLLING=false
+      - PG_USER=postgres
+      - PG_PASSWORD=postgres
+      - PG_HOST=postgres
+      - PG_PORT=5432
+      - PG_DATABASE=conecta_social
+    healthcheck:
+      test: ["CMD-SHELL", "bun --version"] # Simples check se o container está de pé e bun responde
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: "no"
+
+  frontend:
+    environment:
+      - NODE_ENV=test
+      - WATCHPACK_POLLING=false
+    restart: "no"
