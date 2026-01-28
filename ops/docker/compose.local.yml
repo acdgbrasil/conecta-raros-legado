@@ -1,5 +1,5 @@
 # Cenario 2: Backend rodando Local (Host)
-# Use: docker compose -f ops/docker/compose.backend-local.yml up -d
+# Use: docker compose -f ops/docker/compose.local.yml up -d
 # O Backend deve ser iniciado localmente com: bun run dev
 
 include:

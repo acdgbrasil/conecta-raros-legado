@@ -1,0 +1,26 @@
+# Configuração de IDs do Bitwarden Secrets Manager
+# Copie este arquivo para 'bitwarden.ids' e preencha com os UUIDs dos seus segredos.
+
+# ==========================================
+# 1. PRODUÇÃO (PROD)
+# Uso: docker compose -f ops/docker/compose.prod.yml up -d
+# ==========================================
+BWS_ID_PROD_POSTGRES_PASSWORD="cbf8ab47-1013-4bbe-a16c-b3e000243626"
+BWS_ID_PROD_MONGO_PASSWORD="a75090a0-cd51-4aae-9b7e-b3e000245690"
+BWS_ID_PROD_JWT_SECRET="1581f6f3-1f25-4e19-8983-b3e0002621e2"
+
+# ==========================================
+# 2. HOMOLOGAÇÃO (HOMOLOG)
+# Uso: docker compose -f ops/docker/compose.homolog.yml up -d
+# ==========================================
+BWS_ID_HOMOLOG_POSTGRES_PASSWORD="d8a717e1-5dee-4bac-b895-b3e000265718"
+BWS_ID_HOMOLOG_MONGO_PASSWORD="9b5e6dc2-3ed5-40da-b0f3-b3e00026a0da"
+BWS_ID_HOMOLOG_JWT_SECRET="bf8bdf99-e59d-448c-ba81-b3e00026b4e8"
+
+# ==========================================
+# 3. DESENVOLVIMENTO (DEV)
+# Uso: docker compose -f ops/docker/compose.dev.yml (ou local/simulate)
+# ==========================================
+BWS_ID_DEV_POSTGRES_PASSWORD="insira-o-uuid-aqui"
+BWS_ID_DEV_MONGO_PASSWORD="insira-o-uuid-aqui"
+BWS_ID_DEV_JWT_SECRET="insira-o-uuid-aqui"

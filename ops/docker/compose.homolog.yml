@@ -1,0 +1,23 @@
+# Cenario 3: Homologação (QA / Security / Pentest)
+# Semelhante a produção, mas instrumentado para análise.
+# Use: docker compose -f ops/docker/compose.homolog.yml up -d
+
+include:
+  - compose.infra.yml
+  - compose.yml
+
+services:
+  backend:
+    environment:
+      - NODE_ENV=production
+      # Habilita logs detalhados para QAs analisarem fluxos
+      - LOG_LEVEL=debug
+    # Garante reinício em caso de crash durante testes de estresse
+    restart: always
+
+  frontend:
+    environment:
+      - NODE_ENV=production
+    restart: always
+
+  # Bancos de dados persistem dados para testes de longo prazo

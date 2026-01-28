@@ -1,5 +1,5 @@
 # Cenario 1: Backend rodando dentro do Docker (Container)
-# Use: docker compose -f ops/docker/compose.backend-docker.yml up -d
+# Use: docker compose -f ops/docker/compose.simulate.yml up -d
 
 include:
   - compose.infra.yml

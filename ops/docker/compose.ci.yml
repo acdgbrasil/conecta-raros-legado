@@ -1,0 +1,37 @@
+# Cenario 4: CI/CD (Pipeline de Automação)
+# Otimizado para velocidade e dados efêmeros.
+# Use: docker compose -f ops/docker/compose.ci.yml up -d
+
+include:
+  - compose.infra.yml
+  - compose.yml
+
+services:
+  # --- Overrides de Banco de Dados para Performance ---
+  postgres:
+    # tmpfs: Monta o diretório de dados na memória RAM.
+    # Acelera testes de I/O intensivo e garante limpeza ao desligar o container.
+    tmpfs:
+      - /var/lib/postgresql/data
+    environment:
+      # Performance: Desativa sincronização agressiva de disco (fsync) já que dados são voláteis
+      - POSTGRES_HOST_AUTH_METHOD=trust
+
+  mongo:
+    tmpfs:
+      - /data/db
+
+  # --- Aplicação ---
+  backend:
+    environment:
+      - NODE_ENV=test
+      # Desativa watchers de arquivo para economizar CPU no runner de CI
+      - WATCHPACK_POLLING=false
+    # Em CI, se falhar, queremos que pare para o pipeline reportar erro
+    restart: "no"
+
+  frontend:
+    environment:
+      - NODE_ENV=test
+      - WATCHPACK_POLLING=false
+    restart: "no"

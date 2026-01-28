@@ -1,0 +1,74 @@
+# Cenario 5: Produção (Prods) - Com Docker Secrets
+# Ambiente final, controlado por versionamento (Tags) e Segurança Reforçada.
+# Use: APP_VERSION=v1.2.3 docker compose -f ops/docker/compose.prod.yml up -d
+
+include:
+  - compose.infra.yml
+  - compose.yml
+
+services:
+  backend:
+    image: ${DOCKER_REGISTRY:-local}/conecta-backend:${APP_VERSION:-latest}
+    build:
+      context: ../../conecta-social
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      # Backend precisa ser adaptado para ler /run/secrets/ ou usar um script de entrypoint.
+      # Por enquanto, mantemos ENV para compatibilidade, mas os arquivos estão montados.
+    secrets:
+      - postgres_password
+      - mongo_password
+      - jwt_secret
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  frontend:
+    image: ${DOCKER_REGISTRY:-local}/conecta-frontend:${APP_VERSION:-latest}
+    build:
+      context: ../../conecta-social-front
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # --- Bancos de Dados com Secrets ---
+  postgres:
+    restart: always
+    environment:
+      # Diz ao Postgres para ler a senha do arquivo montado
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      # Anula a variável de ambiente insegura herdada (se necessário)
+      POSTGRES_PASSWORD: "" 
+    secrets:
+      - postgres_password
+
+  mongo:
+    restart: always
+    environment:
+      # Diz ao Mongo para ler a senha do arquivo montado
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo_password
+      MONGO_INITDB_ROOT_PASSWORD: ""
+    secrets:
+      - mongo_password
+
+# Definição dos Segredos
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+  mongo_password:
+    file: ./secrets/mongo_password.txt
+  jwt_secret:
+    file: ./secrets/jwt_secret.txt
