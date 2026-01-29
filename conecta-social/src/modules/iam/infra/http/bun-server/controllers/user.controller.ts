@@ -25,15 +25,19 @@ export const makeCreateUserHandler = (useCase: CreateUserUseCase): Handler => as
  * GET /users
  */
 export const makeListUsersHandler = (useCase: ListUsersUseCase): Handler => async (ctx) => {
-  const query = ctx.query;
+  const rawQuery = ctx.query;
+  
+  // Preparação para o Schema (converte strings para números onde necessário)
   const input = {
-    page: Number(query.page) || 1,
-    limit: Number(query.limit) || 10,
-    search: query.search
+    page: rawQuery.page ? Number(rawQuery.page) : undefined,
+    limit: rawQuery.limit ? Number(rawQuery.limit) : undefined,
+    search: rawQuery.search
   };
-  // Zod schema validation could be applied here if strictly required, 
-  // but we are ensuring types match DTO manually for performance/simplicity in this fix.
-  const result = await useCase.execute(input); 
+
+  // O parse vai preencher os defaults se undefined e validar
+  const validated = ListUsersQuerySchema.parse(input);
+  
+  const result = await useCase.execute(validated); 
   return ctx.json(result);
 };
 
@@ -56,10 +60,10 @@ export const makeGetProfileHandler = (useCase: GetUserProfileUseCase): Handler =
  */
 export const makeUpdateUserHandler = (useCase: UpdateUserUseCase): Handler => async (ctx) => {
   const { id } = ctx.params;
-  const body = await ctx.parseBody(UpdateUserSchema.omit({ userId: true })); // Omit ID from body schema if it expects it, or merge.
+  const body = await ctx.parseBody(UpdateUserSchema.omit({id: true})); // Omit ID from body schema if it expects it, or merge.
   // Re-assembling input if UseCase expects userId in DTO
   const input = { ...body, userId: id };
-  const result = await useCase.execute(input);
+  const result = await useCase.execute({...input});
   return ctx.json(result);
 };
 

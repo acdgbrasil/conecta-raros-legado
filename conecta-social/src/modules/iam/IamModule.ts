@@ -111,6 +111,9 @@ export function createIamModule(router: Router, eventBus: EventBus) {
     deleteRoleUseCase,
 
     // Permission
-    listPermissionsUseCase
+    listPermissionsUseCase,
+
+    // Providers
+    jwtProvider
   });
 }

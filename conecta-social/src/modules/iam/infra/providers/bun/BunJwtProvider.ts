@@ -1,4 +1,5 @@
 import { JwtProvider } from "@modules/shared/domain/services/JwtProvider.protocol";
+import { TokenPayloadDTO } from "@modules/iam/application/mappers/auth/outputs/TokenPayload.output";
 
 
 /**
@@ -46,8 +47,9 @@ export class BunJwtProvider implements JwtProvider {
 
   /**
    * Verifies and decodes a JWT.
+   * Default type is TokenPayloadDTO to enforce strong typing in IAM module.
    */
-  async verify<T>(token: string): Promise<T> {
+  async verify<T = TokenPayloadDTO>(token: string): Promise<T> {
     const parts = token.split(".");
     if (parts.length !== 3) throw new Error("Invalid JWT format");
 
@@ -68,9 +70,7 @@ export class BunJwtProvider implements JwtProvider {
 
     const decodedPayload = JSON.parse(new TextDecoder().decode(this.base64UrlDecode(payload)));
 
-    if (decodedPayload.exp && Math.floor(Date.now() / 1000) > decodedPayload.exp) {
-      throw new Error("JWT expired");
-    }
+    if (decodedPayload.exp && Math.floor(Date.now() / 1000) > decodedPayload.exp) throw new Error("JWT expired");
 
     return decodedPayload as T;
   }

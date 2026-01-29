@@ -1,5 +1,9 @@
 import { LoginUseCase } from "@modules/iam/application/useCases/Login.useCase";
-import { Router } from "../../../../shared/http";
+import { Router, stack } from "../../../../shared/http"; // Import stack
+
+// Middlewares
+import { withAuth, requirePermission } from "./middleware/auth.middleware";
+import { PermissionMapper } from "@modules/iam/application/mappers/permission/Permission.mapper";
 
 // Factories de Handlers
 import * as AuthController from "./controllers/auth.controller";
@@ -28,6 +32,9 @@ import { DeleteRoleUseCase } from "@modules/iam/application/useCases/DeleteRole.
 // Permission UseCases
 import { ListPermissionsUseCase } from "@modules/iam/application/useCases/ListPermissions.useCase";
 
+// Providers (Necessário para o middleware)
+import { JwtProvider } from "@modules/shared/domain/services/JwtProvider.protocol";
+
 // UseCases Imports
 
 type Dependencies = {
@@ -53,37 +60,91 @@ type Dependencies = {
 
   // Permission UseCases
   listPermissionsUseCase: ListPermissionsUseCase;
+
+  // Providers
+  jwtProvider: JwtProvider;
 };
 
 export const registerIamRoutes = (router: Router, deps: Dependencies) => {
+  const { IAM_PERMISSIONS: P } = PermissionMapper;
+  const auth = withAuth(deps.jwtProvider); // Helper para encurtar
+
   // --- AUTH ROUTES ---
-  
-  // 1. Login
+  // Rotas Públicas
   router.register("POST", "/auth/login", AuthController.makeLoginHandler(deps.loginUseCase));
-
-  // 2. Refresh Token
   router.register("POST", "/auth/refresh", AuthController.makeRefreshHandler(deps.refreshTokenUseCase));
-
-  // 3. Forgot Password
   router.register("POST", "/auth/forgot-password", AuthController.makeForgotHandler(deps.forgotPasswordUseCase));
-
-  // 4. Reset Password
   router.register("POST", "/auth/reset-password", AuthController.makeResetHandler(deps.resetPasswordUseCase));
 
   // --- USER ROUTES ---
-  router.register("POST", "/users", UserController.makeCreateUserHandler(deps.createUserUseCase));
-  router.register("GET", "/users", UserController.makeListUsersHandler(deps.listUsersUseCase));
-  router.register("GET", "/users/me", UserController.makeGetProfileHandler(deps.getUserProfileUseCase));
-  router.register("PUT", "/users/:id", UserController.makeUpdateUserHandler(deps.updateUserUseCase));
-  router.register("PATCH", "/users/:id/status", UserController.makeToggleStatusHandler(deps.toggleUserStatusUseCase));
-  router.register("PATCH", "/users/:id/role", UserController.makeChangeRoleHandler(deps.changeUserRoleUseCase));
+  
+  // Create User -> [Auth + P.USERS.CREATE]
+  router.register("POST", "/users", stack(
+    [auth, requirePermission(P.USERS.CREATE)],
+    UserController.makeCreateUserHandler(deps.createUserUseCase)
+  ));
+
+  // List Users -> [Auth + P.USERS.READ]
+  router.register("GET", "/users", stack(
+    [auth, requirePermission(P.USERS.READ)],
+    UserController.makeListUsersHandler(deps.listUsersUseCase)
+  ));
+
+  // Get Profile -> [Auth] (Sem permissão específica, qualquer logado vê o seu)
+  router.register("GET", "/users/me", stack(
+    [auth],
+    UserController.makeGetProfileHandler(deps.getUserProfileUseCase)
+  ));
+
+  // Update User -> [Auth + P.USERS.UPDATE]
+  router.register("PUT", "/users/:id", stack(
+    [auth, requirePermission(P.USERS.UPDATE)],
+    UserController.makeUpdateUserHandler(deps.updateUserUseCase)
+  ));
+
+  // Toggle Status -> [Auth + P.USERS.STATUS]
+  router.register("PATCH", "/users/:id/status", stack(
+    [auth, requirePermission(P.USERS.STATUS)],
+    UserController.makeToggleStatusHandler(deps.toggleUserStatusUseCase)
+  ));
+
+  // Change Role -> [Auth + P.ROLES.ASSIGN]
+  router.register("PATCH", "/users/:id/role", stack(
+    [auth, requirePermission(P.ROLES.ASSIGN)],
+    UserController.makeChangeRoleHandler(deps.changeUserRoleUseCase)
+  ));
 
   // --- ROLE ROUTES ---
-  router.register("POST", "/roles", RoleController.makeCreateRoleHandler(deps.createRoleUseCase));
-  router.register("GET", "/roles", RoleController.makeListRolesHandler(deps.listRolesUseCase));
-  router.register("PUT", "/roles/:id", RoleController.makeUpdateRoleHandler(deps.updateRoleUseCase));
-  router.register("DELETE", "/roles/:id", RoleController.makeDeleteRoleHandler(deps.deleteRoleUseCase));
+
+  // Create Role -> [Auth + P.ROLES.CREATE]
+  router.register("POST", "/roles", stack(
+    [auth, requirePermission(P.ROLES.CREATE)],
+    RoleController.makeCreateRoleHandler(deps.createRoleUseCase)
+  ));
+
+  // List Roles -> [Auth + P.ROLES.READ]
+  router.register("GET", "/roles", stack(
+    [auth, requirePermission(P.ROLES.READ)],
+    RoleController.makeListRolesHandler(deps.listRolesUseCase)
+  ));
+
+  // Update Role -> [Auth + P.ROLES.UPDATE]
+  router.register("PUT", "/roles/:id", stack(
+    [auth, requirePermission(P.ROLES.UPDATE)],
+    RoleController.makeUpdateRoleHandler(deps.updateRoleUseCase)
+  ));
+
+  // Delete Role -> [Auth + P.ROLES.DELETE]
+  router.register("DELETE", "/roles/:id", stack(
+    [auth, requirePermission(P.ROLES.DELETE)],
+    RoleController.makeDeleteRoleHandler(deps.deleteRoleUseCase)
+  ));
 
   // --- PERMISSION ROUTES ---
-  router.register("GET", "/permissions", PermissionController.makeListPermissionsHandler(deps.listPermissionsUseCase));
+
+  // List Permissions -> [Auth + P.PERMISSIONS.READ]
+  router.register("GET", "/permissions", stack(
+    [auth, requirePermission(P.PERMISSIONS.READ)],
+    PermissionController.makeListPermissionsHandler(deps.listPermissionsUseCase)
+  ));
 };

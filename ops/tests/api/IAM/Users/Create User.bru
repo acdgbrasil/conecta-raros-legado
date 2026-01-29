@@ -19,13 +19,26 @@ body:json {
     "name": "Test User Bruno",
     "email": "bruno.test@conecta.com",
     "password": "Password123!",
-    "role": "USER"
+    "roleId": "{{role_id}}",
+    "personId": "018e9c32-1b0e-7447-8a62-7231d1b12345"
   }
 }
 
 assert {
   res.status: eq 201
   res.body.id: isString
+}
+
+script:pre-request {
+  // Opcional: Pegar Role ID de SuperAdmin ou Default se necessário
+  // Para teste real, idealmente criar uma role antes ou usar uma fixa do seed
+  // Aqui assume-se que {{role_id}} está no env ou setado antes.
+  // Fallback para hardcoded do seed se vazio
+  if(!bru.getEnvVar("role_id")) {
+     // ID do SuperAdmin do seed (pode variar se UUID for aleatório no seed, 
+     // mas idealmente seed usa fixo ou query busca primeiro)
+     // Vamos deixar o usuário configurar no env "role_id"
+  }
 }
 
 script:post-response {

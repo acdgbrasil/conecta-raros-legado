@@ -16,18 +16,5 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
-handbook/tooling/ai-docs/
-handbook/tooling/tooling-ia/rag_index.sqlite
-handbook/tooling/tooling-ia/rag_tooling_index.sqlite
-handbook/tooling/_meta/
-handbook/tooling/bun/
-handbook/tooling/ElysiaJS/
-handbook/tooling/hono-zod-openAPI/
-handbook/tooling/http/
-handbook/tooling/lgpd/
-handbook/tooling/mongoose/
-handbook/tooling/postgres/
-handbook/tooling/tooling-ia/
-handbook/tooling/typescript/
-handbook/tooling/zod/
+
 
