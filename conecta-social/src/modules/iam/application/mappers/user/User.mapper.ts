@@ -2,18 +2,16 @@ import { UserAggregate, IUser } from "../../../domain/user/user.entity";
 import { createUserId, createPersonId, createRoleId } from "../../../domain/types/identifiers";
 import { Name } from "../../../domain/user/value_objects/Name.vo";
 import { Email } from "../../../domain/user/value_objects/Email.vo";
-import { JobTitle } from "../../../domain/user/value_objects/JobTitle.vo";
-import { Department } from "../../../domain/user/value_objects/Department.vo";
-import { PasswordHasher } from "../../../shared/domain/services/PasswordHasher.protocol";
 import { UserCreatedEvent } from "../../../domain/events/UserCreated.event";
 
 // Imports modulares
 import { CreateUserSchema, CreateUserDTO } from "./inputs/CreateUser.input";
 import { UserResponseSchema, UserResponseDTO } from "./outputs/UserResponse.output";
 import { UserPersistenceCodec, UserPersistenceDTO } from "./persistence/UserPersistence.mapper";
-import { UserCreatedMessageSchema, UserCreatedMessage } from "./messages/UserCreated.message";
+import { UserCreatedMessageSchema } from "./messages/UserCreated.message";
 import { ListUsersQuerySchema, ListUsersQueryDTO } from "./inputs/ListUsers.input";
 import { UpdateUserStatusSchema, UpdateUserStatusDTO } from "./inputs/UpdateUserStatus.input";
+import { PasswordHasher } from "@modules/shared/domain/services/PasswordHasher.protocol";
 
 export class UserMapper {
   public static readonly Schemas = {

@@ -1,5 +1,5 @@
 import { LoginUseCase } from "@modules/iam/application/useCases/Login.useCase";
-import { Router, stack } from "../../../../shared/http";
+import { Router } from "../../../../shared/http";
 
 // Factories de Handlers
 import * as AuthController from "./controllers/auth.controller";

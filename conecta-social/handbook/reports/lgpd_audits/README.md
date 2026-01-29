@@ -12,7 +12,7 @@ Exemplo: `2026-01-22-auditoria-inicial.md`
 2.  **Hipóteses de Tratamento Identificadas:** Base legal utilizada.
 3.  **Riscos Identificados:** Tabela de riscos (Probabilidade x Impacto).
 4.  **Vulnerabilidades de Privacidade:** Dados expostos, logs indevidos, excesso de coleta.
-5.  **Recomendações:** Ações corretivas baseadas no `guide_lgpd.md`.
+5.  **Recomendações:** Ações corretivas baseadas no `handbook/tooling/lgpd/guide_lgpd.md`.
 6.  **Status do RIPD:** Necessidade de atualização do Relatório de Impacto.
 
 ## Histórico

@@ -19,4 +19,4 @@ A estrutura da tabela `recovery_codes` foi revisada. A proposta de migrar de `em
 - **Transparência:** Documentação OpenAPI fornece clareza sobre quais dados são coletados.
 
 ---
-*Relatório de conformidade baseado no guide_lgpd.md.*
+*Relatório de conformidade baseado no handbook/tooling/lgpd/guide_lgpd.md.*

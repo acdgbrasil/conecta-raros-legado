@@ -1,6 +1,5 @@
 import { IRoleRepository } from "../role/role.repository";
 import { IUserRepository } from "../user/user.repository";
-import { RoleAggregate } from "../role/role.entity";
 import { UserId, createPermissionId, PermissionId, RoleId } from "../types/identifiers";
 import { RoleName } from "../role/value_objects/RoleName.vo";
 

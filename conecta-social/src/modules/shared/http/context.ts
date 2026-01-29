@@ -1,5 +1,5 @@
 import { ZodSchema } from "zod";
-import { HttpError, ValidationError } from "./errors";
+import { ValidationError } from "./errors";
 
 export class Context {
   public url: URL;

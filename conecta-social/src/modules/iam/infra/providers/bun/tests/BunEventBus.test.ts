@@ -1,6 +1,6 @@
-import { describe, expect, test, spyOn } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { BunEventBus } from "../BunEventBus";
-import { DomainEvent, EventHandler } from "../../../../shared/domain/events/EventBus.protocol";
+import { DomainEvent, EventHandler } from "@modules/shared/domain/events/EventBus.protocol";
 
 describe("BunEventBus", () => {
   test("should publish and subscribe to events", async () => {

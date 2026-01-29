@@ -2,7 +2,7 @@ import { IUserRepository } from "../user/user.repository";
 import { IRoleRepository } from "../role/role.repository";
 import { RoleName } from "../role/value_objects/RoleName.vo";
 import { UserAggregate } from "../user/user.entity";
-import { RoleId, createPermissionId } from "../types/identifiers";
+import { RoleId } from "../types/identifiers";
 
 /**
  * UserManagerService - Serviço de Domínio para regras complexas de usuários.
