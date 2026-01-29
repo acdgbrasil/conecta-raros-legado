@@ -19,7 +19,7 @@ services:
 
   # --- Bancos de Dados ---
   postgres:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     container_name: conecta-postgres
     restart: always
     command: postgres -c log_min_messages=WARNING
@@ -48,6 +48,9 @@ services:
     container_name: conecta-mongo
     restart: always
     command: ["mongod", "--quiet", "--bind_ip_all"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-example}
     ports:
       - "27017:27017"
     expose:

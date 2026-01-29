@@ -1,56 +1,51 @@
 import { UseCaseProvider } from "../../../shared/providers/useCase/UseCase.provider";
+import { IUserRepository } from "../../domain/user/user.repository";
+import { IRoleRepository } from "../../domain/role/role.repository";
 import { TokenRepository } from "../../domain/authentication/repository/Token.repository";
-import { UserRepository } from "../../domain/user/repository/User.repository";
-import { ChangeRoleInput, UserInput } from "../../mapper/user/User.input";
-import { UserMapper } from "../../mapper/user/User.mapper";
-import { UserResponse } from "../../mapper/user/User.output";
+import { EventBus } from "../../../shared/domain/events/EventBus.protocol";
+import { ChangeRoleDTO } from "../mappers/user/inputs/ChangeRole.input";
+import { UserResponseDTO } from "../mappers/user/outputs/UserResponse.output";
+import { UserMapper } from "../mappers/user/User.mapper";
+import { createUserId, createRoleId } from "../../domain/types/identifiers";
+import { UserManagerService } from "../../domain/services/user-manager.service";
 
 /**
- * UseCase responsável pela alteração de cargo (Role) de um usuário.
- * 
- * Este caso de uso realiza as seguintes ações:
- * 1. Verifica se o usuário alvo existe.
- * 2. Valida se o novo cargo existe.
- * 3. Busca as novas permissões associadas ao cargo.
- * 4. Atualiza o cargo e as permissões na entidade Usuário.
- * 5. Persiste as alterações no banco de dados.
- * 6. CRÍTICO: Revoga todos os Refresh Tokens do usuário para forçar o logout e garantir que as novas permissões sejam aplicadas no próximo login.
+ * ChangeUserRoleUseCase - Altera o cargo de um usuário.
+ * Delega validações de negócio para o UserManagerService (Domínio).
  */
-export class ChangeUserRoleUseCase implements UseCaseProvider<ChangeRoleInput, UserResponse> {
+export class ChangeUserRoleUseCase implements UseCaseProvider<ChangeRoleDTO, UserResponseDTO> {
   
   constructor(
-    private readonly userRepository: UserRepository,
-    private readonly tokenRepository: TokenRepository
+    private readonly userRepository: IUserRepository,
+    private readonly roleRepository: IRoleRepository,
+    private readonly tokenRepository: TokenRepository,
+    private readonly userManagerService: UserManagerService,
+    private readonly eventBus: EventBus
   ) {}
 
-  /**
-   * Executa a troca de cargo.
-   * @param input Dados contendo o ID do usuário e o ID do novo cargo.
-   * @returns O objeto do usuário atualizado.
-   * @throws Error se o usuário ou o cargo não forem encontrados.
-   */
-  async execute(input: ChangeRoleInput): Promise<UserResponse> {
-    const parsed = UserInput.parserChangeRole(input);
+  async execute(input: ChangeRoleDTO): Promise<UserResponseDTO> {
+    const user = await this.userRepository.findById(createUserId(input.userId));
+    if (!user) throw new Error("User not found.");
 
-    const user = await this.userRepository.findById(parsed.userId);
-    if (!user) throw new Error("Usuário não encontrado.");
+    const newRoleId = createRoleId(input.newRoleId);
+    const targetRole = await this.roleRepository.findById(newRoleId);
+    if (!targetRole) throw new Error("Target Role not found.");
 
-    const roleExists = await this.userRepository.checkRoleExists(parsed.newRoleId);
-    if (!roleExists) throw new Error("Cargo (Role) inválido ou inexistente.");
+    // 1. Regras de Negócio no Domínio (Last Admin Standing)
+    await this.userManagerService.validateStatusOrRoleChange(user, newRoleId);
 
-    // TODO: REVISAR REGRAS DE NEGÓCIO DE HIERARQUIA
-    // Ex: Um Admin pode se rebaixar? Um Operador pode promover alguém para Admin?
-    // Atualmente confiamos apenas na permissão da rota, mas regras de domínio podem ser necessárias aqui.
-
-    const newPermissions = await this.userRepository.getPermissionsByRoleId(parsed.newRoleId);
-
-    // O método da entidade já valida se o usuário está ativo
-    user.changeRole(parsed.newRoleId, newPermissions);
-
+    // 2. Executa a mudança
+    user.changeRole(newRoleId);
     await this.userRepository.save(user);
 
-    // Segurança Crítica: Revogar sessões para forçar atualização de permissões
-    await this.tokenRepository.revokeAllUserRefreshTokens(user.id!);
+    // 3. Segurança: Revoga sessões
+    await this.tokenRepository.revokeAllUserRefreshTokens(user.id);
+
+    // 4. Publica eventos
+    for (const event of user.domainEvents) {
+      await this.eventBus.publish(event);
+    }
+    user.clearEvents();
 
     return UserMapper.toResponse(user);
   }

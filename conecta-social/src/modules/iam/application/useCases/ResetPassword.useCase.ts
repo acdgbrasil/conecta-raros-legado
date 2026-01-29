@@ -1,54 +1,63 @@
 import { UseCaseProvider } from "../../../shared/providers/useCase/UseCase.provider";
+import { IUserRepository } from "../../domain/user/user.repository";
 import { RecoveryRepository } from "../../domain/authentication/repository/Recovery.repository";
 import { TokenRepository } from "../../domain/authentication/repository/Token.repository";
-import { UserRepository } from "../../domain/user/repository/User.repository";
-import { AuthInput, ResetPasswordInput } from "../../mapper/auth/Auth.input";
-import { ResetPasswordOutput } from "../../mapper/auth/Auth.output";
+import { PasswordHasher } from "../../../shared/domain/services/PasswordHasher.protocol";
+import { EventBus } from "../../../shared/domain/events/EventBus.protocol";
+import { ResetPasswordDTO } from "../mappers/auth/inputs/ResetPassword.input";
+import { ResetPasswordResponseDTO } from "../mappers/auth/outputs/AuthResponses.output";
+import { AuthMapper } from "../mappers/auth/Auth.mapper";
+import { Email } from "../../domain/user/value_objects/Email.vo";
 
 /**
- * UseCase para redefinir a senha do usuário utilizando um código OTP validado.
+ * ResetPasswordUseCase - Redefine a senha após validação do OTP.
  */
-export class ResetPasswordUseCase implements UseCaseProvider<ResetPasswordInput, ResetPasswordOutput> {
-
-  constructor(
-    private readonly recoveryRepository: RecoveryRepository,
-    private readonly userRepository: UserRepository,
-    private readonly tokenRepository: TokenRepository
-  ){}
-
-  /**
-   * Redefine a senha.
-   * 1. Valida o código OTP.
-   * 2. Atualiza a senha.
-   * 3. Marca código como usado.
-   * 4. Revoga todas as sessões ativas do usuário.
-   */
-  async execute(input: ResetPasswordInput): Promise<ResetPasswordOutput> {
-    const parsedInput = AuthInput.parserResetPassword(input);
-    
-    // 1. Busca usuário primeiro para obter o ID
-    const user = await this.userRepository.findByEmail(parsedInput.email);
-    if(!user || !user.isActive) {
-      throw new Error("Usuário não encontrado ou inativo.");
-    }
-
-    // 2. Valida o código usando o ID do usuário (Integridade Referencial)
-    const recoveryCode = await this.recoveryRepository.findValidRecoveryCode(user.id!, parsedInput.code);
-    if(!recoveryCode) {
-      throw new Error("Código de recuperação inválido ou expirado.");
-    }
-
-    const hashedPassword = await Bun.password.hash(parsedInput.newPassword);
-    
-    user.definePassword(hashedPassword);
-    
-    await this.userRepository.save(user);
-    await this.recoveryRepository.markRecoveryCodeAsUsed(recoveryCode.id);
-    
-    // Logout em todos os dispositivos por segurança
-    await this.tokenRepository.revokeAllUserRefreshTokens(user.id!);
-    
-    return { message: "Senha redefinida com sucesso." };
-  }
+export class ResetPasswordUseCase implements UseCaseProvider<ResetPasswordDTO, ResetPasswordResponseDTO> {
   
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly recoveryRepository: RecoveryRepository,
+    private readonly tokenRepository: TokenRepository,
+    private readonly passwordHasher: PasswordHasher,
+    private readonly eventBus: EventBus
+  ) {}
+
+  async execute(input: ResetPasswordDTO): Promise<ResetPasswordResponseDTO> {
+    const data = AuthMapper.validateResetPassword(input);
+    const emailVO = Email.create(data.email);
+
+    // 1. Busca usuário
+    const user = await this.userRepository.findByEmail(emailVO);
+    if (!user || !user.isActive) {
+      throw new Error("Invalid request or inactive account.");
+    }
+
+    // 2. Valida o código OTP
+    const isValidCode = await this.recoveryRepository.findValidRecoveryCode(user.id, data.code);
+    if (!isValidCode) {
+      throw new Error("Invalid or expired recovery code.");
+    }
+
+    // 3. Atualiza a senha no Domínio (Hasheando antes)
+    // O domínio agora cuida de registrar o evento UserPasswordChanged
+    const newPasswordHash = await this.passwordHasher.hash(data.newPassword);
+    user.changePassword(newPasswordHash);
+
+    // 4. Marca código como usado
+    await this.recoveryRepository.markRecoveryCodeAsUsed(isValidCode.id);
+
+    // 5. Persiste usuário
+    await this.userRepository.save(user);
+
+    // 6. SEGURANÇA: Revoga todas as sessões
+    await this.tokenRepository.revokeAllUserRefreshTokens(user.id);
+
+    // 7. Publica eventos do agregado
+    for (const event of user.domainEvents) {
+      await this.eventBus.publish(event);
+    }
+    user.clearEvents();
+
+    return { message: "Password reset successfully." };
+  }
 }

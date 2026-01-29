@@ -16,6 +16,9 @@
     "rootDir": "src",
     "baseUrl": ".",
     "paths": {
+      "@modules/iam/*": ["./src/modules/iam/*"],
+      "@modules/notifications/*": ["./src/modules/notifications/*"],
+      "@modules/shared/*": ["./src/modules/shared/*"],
       "*": ["./src/*"]
     }
   },

@@ -1,74 +1,41 @@
-import { EventBus } from "../../../shared/domain/events/EventBus.protocol";
-import { UserGenerates } from "../../../shared/infra/services/generated/User.generate";
 import { UseCaseProvider } from "../../../shared/providers/useCase/UseCase.provider";
-import { UserEntity } from "../../domain/user/entity/User.entity";
-import { CreatedUserEvent } from "../../domain/user/events/CreateNewUser.event";
-import { User } from "../../domain/user/factories/User.factory";
-import { UserRepository } from "../../domain/user/repository/User.repository";
-import { CreateUserInput, UserInput } from "../../mapper/user/User.input";
-import { UserMapper } from "../../mapper/user/User.mapper";
-import { UserResponse } from "../../mapper/user/User.output";
+import { IUserRepository } from "../../domain/user/user.repository";
+import { EventBus } from "../../../shared/domain/events/EventBus.protocol";
+import { CreateUserDTO } from "../mappers/user/inputs/CreateUser.input";
+import { UserMapper } from "../mappers/user/User.mapper";
+import { Email } from "../../domain/user/value_objects/Email.vo";
+import { PasswordHasher } from "../../../shared/domain/services/PasswordHasher.protocol";
+import { UserResponseDTO } from "../mappers/user/outputs/UserResponse.output";
 
 /**
- * UseCase responsável por criar novos usuários no sistema.
- * Geralmente invocado por administradores.
+ * CreateUserUseCase - Orquestração de criação de usuário.
  */
-export class CreateUserUseCase implements UseCaseProvider<CreateUserInput,UserResponse> {
+export class CreateUserUseCase implements UseCaseProvider<CreateUserDTO, UserResponseDTO> {
   
   constructor(
-    private readonly userRepository: UserRepository,
+    private readonly userRepository: IUserRepository,
+    private readonly passwordHasher: PasswordHasher,
     private readonly eventBus: EventBus
-  ){}
+  ) {}
 
-  /**
-   * Cria um novo usuário.
-   * 
-   * Fluxo:
-   * 1. Valida input.
-   * 2. Verifica unicidade de email.
-   * 3. Verifica existência do cargo.
-   * 4. Gera senha aleatória forte (se não fornecida).
-   * 5. Hash da senha.
-   * 6. Cria entidade User com permissões carregadas.
-   * 7. Salva no banco.
-   * 8. Publica evento `CreatedUserEvent` (para envio de email de boas-vindas).
-   * 
-   * @param input Dados do novo usuário (nome, email, cargo, etc).
-   * @returns Dados do usuário criado (sem a senha).
-   */
-  async execute(input: CreateUserInput): Promise<UserResponse> {
-    const createUserParsedInput = UserInput.parserCreate(input);
-    const emailAlreadyExists = await this.userRepository.findByEmail(createUserParsedInput.email);
-    if (emailAlreadyExists) throw new Error('Email already in use');
-    const roleExists = await this.userRepository.checkRoleExists(createUserParsedInput.roleId);
-    if (!roleExists) throw new Error('Role does not exist');
-    const getPermissions = await this.userRepository.getPermissionsByRoleId(createUserParsedInput.roleId);
-    const finalPassword = createUserParsedInput.password || UserGenerates.randomPassword();
-    const passwordToHash = await Bun.password.hash(finalPassword);
+  async execute(input: CreateUserDTO): Promise<UserResponseDTO> {
+    // 1. Regra de Negócio: Unicidade de E-mail
+    const email = Email.create(input.email);
+    if (await this.userRepository.existsByEmail(email)) throw new Error(`The email '${input.email}' is already in use.`);
 
-    const userEntity: UserEntity = {
-      name: createUserParsedInput.name,
-      email: createUserParsedInput.email,
-      roleId: createUserParsedInput.roleId,
-      permissions: getPermissions,
-      cpf: createUserParsedInput.cpf,
-      jobTitle: createUserParsedInput.jobTitle,
-      department: createUserParsedInput.department,
-      createdBy: createUserParsedInput.createdBy,
-      isActive: createUserParsedInput.isActive,
-      forceChangePassword: createUserParsedInput.forceChangePassword,
-      passwordHash: passwordToHash,
+    // 2. Transformação Input -> Domínio (Mapper cuida do Hashing e do Evento de Criação)
+    const user = await UserMapper.toDomain(input, this.passwordHasher);
+
+    // 3. Persistência do novo estado
+    await this.userRepository.save(user);
+
+    // 4. Publicação dos Eventos de Domínio acumulados
+    for (const event of user.domainEvents) {
+      await this.eventBus.publish(event);
     }
+    user.clearEvents();
 
-    const newUser = User.create(userEntity);
-    await this.userRepository.save(newUser);
-    await this.eventBus.publish(new CreatedUserEvent(
-      newUser.id!,
-      newUser.email,
-      newUser.name,
-      finalPassword
-    ));
-    
-    return UserMapper.toResponse(newUser);
+    // 5. Resposta Limpa para a Interface
+    return UserMapper.toResponse(user);
   }
 }

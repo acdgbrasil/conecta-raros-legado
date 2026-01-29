@@ -1,105 +1,86 @@
 import { pg } from "../client/postgres.client";
-import bcrypt from "bcrypt";
 
 export async function seedIAM() {
-  console.log("🌱 Iniciando Seed do IAM...");
+  console.log("🌱 Iniciando Seed IAM (Bootstrap)...");
 
   try {
-    // 0. Setup
     await pg`SET TIME ZONE 'America/Fortaleza';`;
+    
+    const adminEmail = Bun.env.SUPER_ADM_EMAIL || "admin@conecta.com";
+    const adminPass = Bun.env.SUPER_ADM_PASSWORD || "admin_password";
 
     // =================================================================
-    // 1. PERMISSÕES (Capabilities)
+    // 1. PERMISSÕES DE BOOTSTRAP (Apenas o necessário para gerir o IAM)
     // =================================================================
-    const permissions = [
-      // IAM
-      { slug: 'users:read', description: 'Ver lista de usuários' },
-      { slug: 'users:write', description: 'Criar ou editar usuários' },
-      { slug: 'users:block', description: 'Bloquear/Desbloquear acesso' },
-      { slug: 'users:promote', description: 'Promover cargo de usuários' },
-
-      // Social Care (Core)
-      { slug: 'families:read', description: 'Visualizar dados familiares' },
-      { slug: 'families:write', description: 'Cadastrar/Editar famílias' },
-
-      // Reporting
-      { slug: 'reports:read', description: 'Visualizar relatórios gerenciais' },
-      
-      // System
-      { slug: 'settings:read', description: 'Ver configurações do sistema' },
-      { slug: 'settings:write', description: 'Alterar configurações do sistema' },
+    console.log("   --> Semeando Permissões Essenciais...");
+    
+    // Sem essas permissões, o Admin não consegue criar outras roles ou usuários.
+    const bootstrapPermissions = [
+      { slug: 'users:read', description: 'Listar usuários', module: 'iam' },
+      { slug: 'users:write', description: 'Criar/Editar usuários', module: 'iam' },
+      { slug: 'roles:read', description: 'Listar cargos', module: 'iam' },
+      { slug: 'roles:write', description: 'Gerenciar cargos e permissões', module: 'iam' },
+      { slug: 'permissions:read', description: 'Listar permissões disponíveis', module: 'iam' }
     ];
 
-    for (const p of permissions) {
+    for (const p of bootstrapPermissions) {
       await pg`
-        INSERT INTO permissions (slug, description)
-        VALUES (${p.slug}, ${p.description})
-        ON CONFLICT (slug) DO NOTHING;
+        INSERT INTO permissions (slug, description, module)
+        VALUES (${p.slug}, ${p.description}, ${p.module})
+        ON CONFLICT (slug) DO UPDATE SET 
+          description = EXCLUDED.description,
+          module = EXCLUDED.module;
       `;
     }
 
     // =================================================================
-    // 2. ROLES (Cargos)
+    // 2. ROLE SUPER ADMIN (System Protected)
     // =================================================================
+    console.log("   --> Semeando Role SuperAdmin...");
     
-    // ADMIN
     const [adminRole] = await pg`
       INSERT INTO roles (name, description, is_system)
-      VALUES ('ADMIN', 'Super Administrador', true)
-      ON CONFLICT (name) DO UPDATE SET description = EXCLUDED.description
-      RETURNING id
-    `;
-
-    // OPERATOR (Equivalente ao 'user' do frontend)
-    const [operatorRole] = await pg`
-      INSERT INTO roles (name, description, is_system)
-      VALUES ('OPERATOR', 'Operador Técnico Social', true)
+      VALUES ('SuperAdmin', 'Acesso irrestrito ao gerenciamento do sistema', true)
       ON CONFLICT (name) DO UPDATE SET description = EXCLUDED.description
       RETURNING id
     `;
 
     // =================================================================
-    // 3. ROLE_PERMISSIONS
+    // 3. VÍNCULO (Admin -> Bootstrap Permissions)
     // =================================================================
-
-    // Admin = Tudo
+    // Nota: O SuperAdmin conceitualmente pode ter bypass de permissão no código,
+    // mas vinculamos explicitamente para manter a consistência do modelo RBAC.
     await pg`
       INSERT INTO role_permissions (role_id, permission_id)
-      SELECT ${adminRole.id}, id FROM permissions
-      ON CONFLICT DO NOTHING
-    `;
-
-    // Operator = Apenas Famílias e Relatórios
-    await pg`
-      INSERT INTO role_permissions (role_id, permission_id)
-      SELECT ${operatorRole.id}, id FROM permissions 
-      WHERE slug LIKE 'families:%' OR slug = 'reports:read'
+      SELECT ${adminRole.id}, id FROM permissions 
+      WHERE slug IN ${pg(bootstrapPermissions.map(p => p.slug))}
       ON CONFLICT DO NOTHING
     `;
 
     // =================================================================
-    // 4. SUPER ADMIN USER
+    // 4. USUÁRIO ROOT
     // =================================================================
-    const adminEmail = process.env.SUPER_ADM_EMAIL || "admin@conecta.com";
-    const adminPass = process.env.SUPER_ADM_PASSWORD || "admin_password";
-    const hashedPassword = await bcrypt.hash(adminPass, 10);
+    console.log(`   --> Criando Root User (${adminEmail})...`);
+    
+    const hashedPassword = await Bun.password.hash(adminPass);
 
-    // person_id gerado automaticamente pelo DEFAULT uuidv7() do banco
     await pg`
       INSERT INTO users (
         name, email, password_hash, role_id, is_active, 
-        job_title, department
+        job_title, department, force_change_password
       )
       VALUES (
-        'Super Admin', ${adminEmail}, ${hashedPassword}, ${adminRole.id}, true,
-        'System Administrator', 'IT'
+        'Root Administrator', ${adminEmail}, ${hashedPassword}, ${adminRole.id}, true,
+        'SysAdmin', 'Infra', false
       )
-      ON CONFLICT (email) DO NOTHING
+      ON CONFLICT (email) DO UPDATE SET
+        password_hash = EXCLUDED.password_hash,
+        role_id = EXCLUDED.role_id,
+        is_active = true
     `;
 
-    console.log("✅ Seed IAM Concluído!");
-    console.log(`   Admin Role ID: ${adminRole.id}`);
-    console.log(`   User: ${adminEmail}`);
+    console.log("✅ IAM Bootstrap Concluído!");
+    console.log(`   🔑 SuperAdmin Role ID: ${adminRole.id}`);
 
   } catch (error) {
     console.error("❌ Erro no Seed:", error);

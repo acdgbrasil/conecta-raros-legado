@@ -6,7 +6,17 @@ export async function createIAMTables() {
   try {
     // 0. Configurações de Sessão e Extensões
     await pg`SET TIME ZONE 'America/Fortaleza';`;
-    await pg`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`;
+
+    // --- RESET (DEV ONLY) ---
+    // Remove tabelas antigas para garantir schema novo
+    await pg`DROP TABLE IF EXISTS invites CASCADE`;
+    await pg`DROP TABLE IF EXISTS audit_logs CASCADE`;
+    await pg`DROP TABLE IF EXISTS recovery_codes CASCADE`;
+    await pg`DROP TABLE IF EXISTS refresh_tokens CASCADE`;
+    await pg`DROP TABLE IF EXISTS users CASCADE`;
+    await pg`DROP TABLE IF EXISTS role_permissions CASCADE`;
+    await pg`DROP TABLE IF EXISTS permissions CASCADE`;
+    await pg`DROP TABLE IF EXISTS roles CASCADE`;
 
     // ==========================================================
     // 1. Tabela de CARGOS (Roles)
@@ -30,6 +40,7 @@ export async function createIAMTables() {
         id UUID PRIMARY KEY DEFAULT uuidv7(),
         slug TEXT NOT NULL UNIQUE,
         description TEXT,
+        module TEXT,
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
     `;
@@ -85,6 +96,17 @@ export async function createIAMTables() {
     await pg`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_person_id ON users(person_id);`;
     await pg`CREATE INDEX IF NOT EXISTS idx_users_name ON users(name);`;
     await pg`CREATE INDEX IF NOT EXISTS idx_users_role ON users(role_id);`;
+
+    // --- Índices de Performance de Negócio (Recomendados pelo Arquiteto) ---
+    
+    // Otimiza countActiveSuperAdmins() - Regra #7 (Last Admin Standing)
+    // Busca apenas usuários ativos que possuem a role de admin (precisamos do ID fixo ou usar JOIN)
+    // Como o ID da role pode mudar em setups diferentes, criaremos um índice em role_id filtrado por is_active
+    await pg`CREATE INDEX IF NOT EXISTS idx_users_active_role ON users(role_id) WHERE is_active = true;`;
+
+    // Otimiza busca textual (Trigram para LIKE '%term%')
+    await pg`CREATE EXTENSION IF NOT EXISTS pg_trgm;`;
+    await pg`CREATE INDEX IF NOT EXISTS idx_users_search_trgm ON users USING gin (name gin_trgm_ops, email gin_trgm_ops);`;
 
     // ==========================================================
     // 5. Tabela de REFRESH TOKENS

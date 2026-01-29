@@ -1,21 +1,23 @@
-# bunfig.toml
+# bunfig.toml - Optimized for Conecta Social (Bun Native)
 # Documentation: https://bun.sh/docs/runtime/bunfig
 
 telemetry = false
 
 [install]
-# Link workspaces packages to node_modules
+# Crucial para o design modular (src/modules/*)
 linkWorkspacePackages = true
-# Install peer dependencies
+# Instala peer dependencies automaticamente
 peer = true
-# Use a text-based lockfile for better git diffs
-saveTextLockfile = true
+
+[install.lockfile]
+# Padrão moderno Bun 1.2+ (Garante diffs limpos no Git)
+print = "bun"
 
 [run]
-# Use bun as the runner for scripts
+# Força o runner nativo do Bun em todos os scripts do package.json
 bun = true
 
 [test]
-# Test runner configuration
+# Garante que os testes procurem em toda a árvore do projeto
 root = "."
 coverage = false
