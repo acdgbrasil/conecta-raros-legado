@@ -25,14 +25,15 @@ export const makeCreateUserHandler = (useCase: CreateUserUseCase): Handler => as
  * GET /users
  */
 export const makeListUsersHandler = (useCase: ListUsersUseCase): Handler => async (ctx) => {
-  // Query params are strings, we might need to cast/parse them via schema if schema handles coercion
   const query = ctx.query;
-  // Note: Zod schema should handle coercion if configured, otherwise we might need manual casting.
-  // Assuming ListUsersQuerySchema handles basic string->number/boolean coercion or we pass raw and let Zod handle it.
-  // Checking schema (not shown but assuming safeParse handles what's passed).
-  // Actually, query params come as strings. If schema expects numbers, we need to convert.
-  // For now passing as is, assuming schema uses z.coerce or similar.
-  const result = await useCase.execute(query as any); 
+  const input = {
+    page: Number(query.page) || 1,
+    limit: Number(query.limit) || 10,
+    search: query.search
+  };
+  // Zod schema validation could be applied here if strictly required, 
+  // but we are ensuring types match DTO manually for performance/simplicity in this fix.
+  const result = await useCase.execute(input); 
   return ctx.json(result);
 };
 
