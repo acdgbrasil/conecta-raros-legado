@@ -1,49 +1,48 @@
-import { PasswordRecoveryRequestedEvent } from "../../domain/user/events/PasswordRecoveryRequested.event";
-import { TimeInSeconds } from "../../../shared/constants/TimeInSeconds.constants";
 import { UseCaseProvider } from "../../../shared/providers/useCase/UseCase.provider";
+import { IUserRepository } from "../../domain/user/user.repository";
 import { RecoveryRepository } from "../../domain/authentication/repository/Recovery.repository";
-import { UserRepository } from "../../domain/user/repository/User.repository";
-import { AuthInput, ForgotPasswordInput } from "../../mapper/auth/Auth.input";
-import { ForgotPasswordOutput } from "../../mapper/auth/Auth.output";
 import { EventBus } from "../../../shared/domain/events/EventBus.protocol";
+import { ForgotPasswordDTO } from "../mappers/auth/inputs/ForgotPassword.input";
+import { ForgotPasswordResponseDTO } from "../mappers/auth/outputs/AuthResponses.output";
+import { AuthMapper } from "../mappers/auth/Auth.mapper";
+import { Email } from "../../domain/user/value_objects/Email.vo";
+import { TimeInSeconds } from "../../../shared/constants/TimeInSeconds.constants";
+import { PasswordRecoveryRequestedEvent } from "modules/iam/domain/user/events/PasswordRecoveryRequested.event";
 
 /**
- * UseCase responsável por iniciar o fluxo de recuperação de senha.
- * Gera um código OTP e dispara evento para envio de e-mail.
+ * ForgotPasswordUseCase - Inicia o fluxo de recuperação de senha.
  */
-export class ForgotPasswordUseCase implements UseCaseProvider<ForgotPasswordInput,ForgotPasswordOutput> {
-
+export class ForgotPasswordUseCase implements UseCaseProvider<ForgotPasswordDTO, ForgotPasswordResponseDTO> {
+  
   constructor(
-    private readonly userRepository: UserRepository,
+    private readonly userRepository: IUserRepository,
     private readonly recoveryRepository: RecoveryRepository,
-    private readonly eventBus: EventBus // Injeção do EventBus
+    private readonly eventBus: EventBus
   ) {}
 
-  /**
-   * Executa a solicitação de recuperação.
-   * Implementa "Silent Fail" para evitar Enumeration Attacks.
-   * 
-   * @param input E-mail do usuário.
-   * @returns Mensagem genérica de sucesso.
-   */
-  async execute(input: ForgotPasswordInput): Promise<ForgotPasswordOutput> {
-    const parsedInput = AuthInput.parserForgotPassword(input);
-    const user = await this.userRepository.findByEmail(parsedInput.email);
+  async execute(input: ForgotPasswordDTO): Promise<ForgotPasswordResponseDTO> {
+    const data = AuthMapper.validateForgotPassword(input);
+    const emailVO = Email.create(data.email);
+    
+    const user = await this.userRepository.findByEmail(emailVO);
 
-    // SECURITY: Silent Fail
+    const message = "If the email is registered, you will receive a recovery code.";
+
+    // SECURITY: Silent Fail (Enumeration protection)
     if (!user || !user.isActive) {
-      return { message: "Se o e-mail estiver cadastrado, você receberá um código de recuperação." };
+      return { message };
     }
 
+    // 1. Gera código OTP
     const recoveryCode = this.recoveryRepository.createRecoveryCode();
     const expiresAt = new Date(Date.now() + (TimeInSeconds.FIFTEEN_MINUTES * 1000));
     
-    // Passa o ID do usuário para garantir FK
-    await this.recoveryRepository.saveRecoveryCode(user.id!, recoveryCode, expiresAt);
+    // 2. Salva o código
+    await this.recoveryRepository.saveRecoveryCode(user.id, recoveryCode, expiresAt);
 
-    // Publica o evento ao invés de chamar o outro UseCase diretamente
-    await this.eventBus.publish(new PasswordRecoveryRequestedEvent(user.email, recoveryCode));
+    // 3. Dispara evento de recuperação (para envio de e-mail)
+    await this.eventBus.publish(new PasswordRecoveryRequestedEvent(user.email.value, recoveryCode));
 
-    return { message: "Se o e-mail estiver cadastrado, você receberá um código de recuperação." };
+    return { message };
   }
 }

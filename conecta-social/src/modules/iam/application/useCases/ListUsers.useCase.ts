@@ -1,29 +1,42 @@
 import { UseCaseProvider } from "../../../shared/providers/useCase/UseCase.provider";
-import { UserRepository } from "../../domain/user/repository/User.repository";
-import { ListUsersInput, UserInput } from "../../mapper/user/User.input";
-import { UserMapper } from "../../mapper/user/User.mapper";
-import { ListUsersOutput } from "../../mapper/user/User.output";
+import { IUserRepository } from "../../domain/user/user.repository";
+import { ListUsersQueryDTO, UserResponseDTO } from "../mappers/user/User.mapper";
+import { UserMapper } from "../mappers/user/User.mapper";
+
+export type PaginatedUsersResponse = {
+  data: UserResponseDTO[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+  };
+};
 
 /**
- * UseCase para listar usuários com paginação.
- * Utilizado principalmente em dashboards administrativos.
+ * ListUsersUseCase - Lista usuários com paginação e busca.
+ * O Mapper garante que os valores numéricos de page e limit existam e sejam válidos.
  */
-export class ListUsersUseCase implements UseCaseProvider<ListUsersInput, ListUsersOutput> {
+export class ListUsersUseCase implements UseCaseProvider<ListUsersQueryDTO, PaginatedUsersResponse> {
   
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(private readonly userRepository: IUserRepository) {}
 
-  async execute(input: ListUsersInput): Promise<ListUsersOutput> {
-    const parsed = UserInput.parserList(input);
-    const offset = (parsed.page - 1) * parsed.limit;
+  async execute(query: ListUsersQueryDTO): Promise<PaginatedUsersResponse> {
+    // Cálculo do offset otimizado para o banco
+    const offset = (query.page - 1) * query.limit;
 
-    const { users, total } = await this.userRepository.findAll(parsed.limit, offset);
+    // Busca paginada real via repositório
+    const { users, total } = await this.userRepository.findAllPaginated(
+      query.limit, 
+      offset, 
+      query.search
+    );
 
     return {
       data: users.map(UserMapper.toResponse),
       meta: {
-        page: parsed.page,
-        limit: parsed.limit,
-        total: total
+        page: query.page,
+        limit: query.limit,
+        total
       }
     };
   }

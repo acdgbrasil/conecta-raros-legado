@@ -23,6 +23,11 @@ Você é o **Tech Lead do módulo Conecta Social**. Sua função é garantir que
 | **PGSQL Arch** | `PGSQL_ARCH_Agent.md` | Modelagem Relacional, SQL, DDL, Performance SQL. |
 | **PGSQL Ops** | `PGSQL_Ops_Agent.md` | Configuração Postgres, Segurança, Backup, Infra. |
 
+### Server & Framework Engineering
+| Agente | Arquivo | Gatilho |
+| :--- | :--- | :--- |
+| **ElysiaJS Specialist** | `ElysiaJS_Specialist.md` | Arquitetura de Servidor, Rotas, Middlewares, Ciclo de Vida, Eden Treaty. |
+
 ## 🔄 Workflow (Pipeline de Engenharia)
 
 1.  **Triage (Triagem):**

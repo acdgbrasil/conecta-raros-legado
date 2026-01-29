@@ -14,6 +14,7 @@ Você é o **Coordenador do Projeto**, responsável por analisar solicitações 
 | **`@conecta-social/Agents/Orchestrator_Agent`** | Engenharia de Software | Solicitações envolvendo backend, banco de dados, regras de negócio ou governança do módulo `conecta-social`. |
 | **`GitHub_Actions_Specialist`** | CI/CD & Automação | Criação, correção e otimização de pipelines `.github/workflows`, Actions e OIDC. |
 | **`Git_Commit_Reviewer`** | Controle de Versão | Solicitações sobre commits, histórico git, padronização de mensagens e changelogs. |
+| **`Bun_Docs_Specialist`** | Documentação Bun (RAG) | Dúvidas sobre API do Bun, flags, performance ou funcionalidades, usando RAG local. |
 
 ## 🔄 Workflow (Pipeline de Coordenação)
 

@@ -17,8 +17,8 @@ ENV_FILE="ops/docker/.env"
 echo -e "${GREEN}=== Setup de Segredos com Bitwarden (BWS) ===${NC}"
 
 # 1. Verificações Prévias
-if ! command -v bws &> /dev/null; then
-    echo -e "${RED}Erro: 'bws' CLI não encontrado.${NC}"
+if ! command -v bw &> /dev/null; then
+    echo -e "${RED}Erro: 'bw' CLI não encontrado.${NC}"
     echo "Instale via: 'brew install bitwarden-secrets-cli' ou 'npm install -g @bitwarden/sdk-cli'"
     exit 1
 fi
@@ -39,19 +39,19 @@ fetch_value_with_fallback() {
     local fallback=$3
     
     if [ "$id" == "insira-o-uuid-aqui" ] || [ -z "$id" ]; then
-        echo -e "${YELLOW}[DEFAULT] Usando padrão para $name${NC}"
+        echo -e "${YELLOW}[DEFAULT] Usando padrão para $name${NC}" >&2
         echo "$fallback"
         return
     fi
     
-    echo -n "Buscando $name no BWS... "
-    VALUE=$(bws secret get "$id" | jq -r '.value' 2>/dev/null)
+    echo -n "Buscando $name no BWS... " >&2
+    VALUE=$(bw secret get "$id" | jq -r '.value' 2>/dev/null)
     
     if [ $? -eq 0 ] && [ ! -z "$VALUE" ]; then
-        echo -e "${GREEN}OK${NC}"
+        echo -e "${GREEN}OK${NC}" >&2
         echo "$VALUE"
     else
-        echo -e "${RED}FALHA! Usando padrão.${NC}"
+        echo -e "${RED}FALHA! Usando padrão.${NC}" >&2
         echo "$fallback"
     fi
 }

@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/api/auth/refresh
+  url: {{baseUrl}}/auth/refresh
   body: json
   auth: none
 }
@@ -18,11 +18,11 @@ body:json {
 
 assert {
   res.status: eq 200
-  res.body.token: isString
+  res.body.accessToken: isString
 }
 
 tests {
   test("Deve retornar novo token", function() {
-    expect(res.body.token).to.not.equal(bru.getEnvVar("jwt_token"));
+    expect(res.body.accessToken).to.not.equal(bru.getEnvVar("jwt_token"));
   });
 }

@@ -5,7 +5,7 @@
 import { Context, MiddlewareHandler, Next } from "hono";
 import { JwtProvider } from "../../../../../shared/providers/jwt/Jwt.provider"; 
 import { User } from "../../../../domain/user/factories/User.factory"; 
-import { UserEntity } from "../../../../domain/user/entity/User.entity";
+import { UserEntity } from "../../../../domain/user/aggregate/User.entity";
 
 // ------------------------------------------------------------------
 declare module 'hono' {

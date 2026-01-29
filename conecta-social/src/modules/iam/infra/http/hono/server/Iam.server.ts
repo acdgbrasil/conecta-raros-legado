@@ -28,6 +28,7 @@ import { UserCreatedHandler } from "../../../../../notifications/application/han
 
 // Controller
 import { AuthController } from "../controllers/Auth.Controller";
+import { UserController } from "../controllers/User.Controller";
 
 export const IamServer = () => {
   const app = new Hono();
@@ -70,13 +71,16 @@ export const IamServer = () => {
     refreshUseCase, 
     forgotUseCase, 
     resetUseCase,
+  );
+
+  const userController = new UserController(
     createUserUseCase,
     listUsersUseCase,
     changeRoleUseCase,
     updateStatusUseCase,
     updateUserUseCase,
     getProfileUseCase
-  );
+  )
 
   // --- PUBLIC ROUTES ---
   app.post("/auth/login", (c) => authController.login(c));
@@ -89,39 +93,39 @@ export const IamServer = () => {
   // Perfil (Apenas Auth)
   app.get("/users/me",
     authMiddleware(jwtProvider),
-    (c) => authController.getProfile(c)
+    (c) => userController.getProfile(c)
   );
 
   // Gestão de Usuários
   app.post("/users", 
     authMiddleware(jwtProvider), 
     requirePermission('users:write'), 
-    (c) => authController.createUser(c)
+    (c) => userController.createUser(c)
   );
 
   app.get("/users", 
     authMiddleware(jwtProvider), 
     requirePermission('users:read'), 
-    (c) => authController.listUsers(c)
+    (c) => userController.listUsers(c)
   );
 
   app.put("/users/:id", 
     authMiddleware(jwtProvider), 
     requirePermission('users:write'), 
-    (c) => authController.updateUser(c)
+    (c) => userController.updateUser(c)
   );
 
   // Administração
   app.patch("/users/:id/role",
     authMiddleware(jwtProvider),
     requirePermission('users:promote'),
-    (c) => authController.changeUserRole(c)
+    (c) => userController.changeUserRole(c)
   );
 
   app.patch("/users/:id/status",
     authMiddleware(jwtProvider),
     requirePermission('users:block'),
-    (c) => authController.updateUserStatus(c)
+    (c) => userController.updateUserStatus(c)
   );
   
   return app;

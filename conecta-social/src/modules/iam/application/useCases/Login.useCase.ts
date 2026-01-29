@@ -1,72 +1,81 @@
-import { TimeInSeconds } from "../../../shared/constants/TimeInSeconds.constants";
-import { JwtProvider } from "../../../shared/providers/jwt/Jwt.provider";
 import { UseCaseProvider } from "../../../shared/providers/useCase/UseCase.provider";
+import { IUserRepository } from "../../domain/user/user.repository";
 import { TokenRepository } from "../../domain/authentication/repository/Token.repository";
-import { UserRepository } from "../../domain/user/repository/User.repository"; 
-import { AuthInput, LoginInput } from "../../mapper/auth/Auth.input";
-import { LoginOutput } from "../../mapper/auth/Auth.output";
-import { UserMapper } from "../../mapper/user/User.mapper";
+import { PasswordHasher } from "../../../shared/domain/services/PasswordHasher.protocol";
+import { JwtProvider } from "../../../shared/domain/services/JwtProvider.protocol";
+import { EventBus } from "../../../shared/domain/events/EventBus.protocol";
+import { LoginDTO } from "../mappers/auth/inputs/Login.input";
+import { LoginResponseDTO } from "../mappers/auth/outputs/LoginResponse.output";
+import { AuthMapper } from "../mappers/auth/Auth.mapper";
+import { UserMapper } from "../mappers/user/User.mapper";
+import { Email } from "../../domain/user/value_objects/Email.vo";
+import { TimeInSeconds } from "../../../shared/constants/TimeInSeconds.constants";
 
 /**
- * UseCase responsável pela autenticação (Login) do usuário.
+ * LoginUseCase - Realiza a autenticação e gera tokens de acesso.
  */
-export class LoginUseCase implements UseCaseProvider<LoginInput,LoginOutput> {
-
+export class LoginUseCase implements UseCaseProvider<LoginDTO, LoginResponseDTO> {
+  
   constructor(
-    private readonly userRepository: UserRepository,
+    private readonly userRepository: IUserRepository,
     private readonly tokenRepository: TokenRepository,
-    private readonly jwtProvider: JwtProvider
-  ){}
+    private readonly passwordHasher: PasswordHasher,
+    private readonly jwtProvider: JwtProvider,
+    private readonly eventBus: EventBus
+  ) {}
 
-  /**
-   * Realiza o login.
-   * 1. Valida credenciais.
-   * 2. Verifica hash da senha.
-   * 3. Gera Access Token (curta duração).
-   * 4. Gera Refresh Token (longa duração) e salva hash no banco.
-   * 
-   * @param input Email e Senha.
-   * @returns Tokens e dados do usuário.
-   */
-  async execute(input: { email: string; password: string; }): Promise<LoginOutput> {
-    // Parser atualizado
-    const loginParsed = AuthInput.parserLogin(input);
-    
-    const user = await this.userRepository.findByEmail(loginParsed.email);
-    if(!user) throw new Error("Credenciais inválidas.");
-    if(!user.passwordHash) throw new Error("Conta não ativada ou sem senha definida.");
-    const isValid = await Bun.password.verify(loginParsed.password, user.passwordHash);
-    if(!isValid) throw new Error("Credenciais inválidas.");
-    if(!user.isActive) throw new Error("Usuário inativo. Contate o administrador.");
+  async execute(input: LoginDTO): Promise<LoginResponseDTO> {
+    // 1. Validação de Formato (Fail-Fast)
+    const credentials = AuthMapper.validateLogin(input);
 
-    const token = await this.jwtProvider.sign({
-      sub: user.id!,
-      type:'access',
+    // 2. Busca Usuário
+    const user = await this.userRepository.findByEmail(Email.create(credentials.email));
+    if (!user || !user.isActive) {
+      throw new Error("Invalid credentials or inactive account.");
+    }
+
+    // 3. Validação de Senha
+    const isPasswordValid = await this.passwordHasher.compare(credentials.password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new Error("Invalid credentials.");
+    }
+
+    // 4. Registro de Login no Domínio (Event Design)
+    user.registerLogin();
+
+    // 5. Geração de Tokens
+    const accessToken = await this.jwtProvider.sign({
+      sub: user.id,
       roleId: user.roleId,
-      permissions: user.permissions || [],
-    },TimeInSeconds.FIVE_MINUTES);
+      type: 'access'
+    }, TimeInSeconds.FIVE_MINUTES);
 
     const refreshToken = await this.jwtProvider.sign({
-      sub: user.id!,
-      type:'refresh',
-    },TimeInSeconds.THIRTY_DAYS);
+      sub: user.id,
+      type: 'refresh'
+    }, TimeInSeconds.THIRTY_DAYS);
 
+    // 6. Persistência do Refresh Token (Hash)
     const hasher = new Bun.CryptoHasher("sha256");
-    const hash = hasher.update(refreshToken).digest("hex");
+    const rtHash = hasher.update(refreshToken).digest("hex");
+    const expiresAt = new Date(Date.now() + (TimeInSeconds.THIRTY_DAYS * 1000));
     
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30);
+    await this.tokenRepository.saveRefreshToken(user.id, rtHash, expiresAt);
 
-    await this.tokenRepository.saveRefreshToken(user.id!, hash, expiresAt);
-
-    user.registerLogin();
+    // 7. Salva estado do usuário (lastLoginAt)
     await this.userRepository.save(user);
 
-    return {
-      accessToken: token,
-      refreshToken: refreshToken,
-      user: UserMapper.toResponse(user),
+    // 8. Publicação de Eventos (UserLoggedIn)
+    for (const event of user.domainEvents) {
+      await this.eventBus.publish(event);
     }
-  }
+    user.clearEvents();
 
+    // 9. Resposta
+    return AuthMapper.toLoginResponse({
+      accessToken,
+      refreshToken,
+      user: UserMapper.toResponse(user)
+    });
+  }
 }

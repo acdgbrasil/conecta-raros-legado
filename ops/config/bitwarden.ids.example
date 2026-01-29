@@ -8,6 +8,7 @@
 BWS_ID_PROD_POSTGRES_PASSWORD="insira-o-uuid-aqui"
 BWS_ID_PROD_MONGO_PASSWORD="insira-o-uuid-aqui"
 BWS_ID_PROD_JWT_SECRET="insira-o-uuid-aqui"
+BWS_ID_PROD_RESEND_KEY="insira-o-uuid-aqui"
 
 # ==========================================
 # 2. HOMOLOGAÇÃO (HOMOLOG)

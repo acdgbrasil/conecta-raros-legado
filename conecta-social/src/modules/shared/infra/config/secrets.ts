@@ -1,21 +1,24 @@
-import fs from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 /**
  * Recupera um segredo ou variável de ambiente.
+ * Otimizado para Bun Runtime.
+ * 
  * Prioridade:
  * 1. Arquivo definido em <KEY>_FILE (ex: PG_PASSWORD_FILE)
- * 2. Arquivo padrão em /run/secrets/<key_lowercase> (se for ambiente Docker Swarm/Secrets padrão)
- * 3. Variável de ambiente <KEY>
- * 4. Valor padrão (defaultValue)
+ * 2. Variável de ambiente <KEY> (Bun.env)
+ * 3. Valor padrão (defaultValue)
  */
 export const getSecret = (key: string, defaultValue?: string): string => {
-  // 1. Tenta ler do arquivo apontado pela variável _FILE
+  // 1. Tenta ler do arquivo apontado pela variável _FILE (Docker Secrets Pattern)
   const fileEnvVar = `${key}_FILE`;
-  if (process.env[fileEnvVar]) {
-    const filePath = process.env[fileEnvVar];
+  // Bun.env é um objeto rápido, não uma chamada de sistema lenta
+  const filePath = Bun.env[fileEnvVar];
+
+  if (filePath) {
     try {
-      if (fs.existsSync(filePath!)) {
-        return fs.readFileSync(filePath!, 'utf-8').trim();
+      if (existsSync(filePath)) {
+        return readFileSync(filePath, 'utf-8').trim();
       }
     } catch (e) {
       console.warn(`[Secrets] Falha ao ler arquivo de segredo em ${filePath}: ${e}`);
@@ -23,8 +26,9 @@ export const getSecret = (key: string, defaultValue?: string): string => {
   }
 
   // 2. Fallback: Variável de ambiente direta
-  if (process.env[key]) {
-    return process.env[key]!;
+  const value = Bun.env[key];
+  if (value !== undefined) {
+    return value;
   }
 
   // 3. Valor padrão
