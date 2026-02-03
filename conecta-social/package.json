@@ -26,17 +26,14 @@
     "zod": "^4.3.5"
   },
   "scripts": {
-    "start": "bun src/server-bun.ts",
+    "start": "bun --watch src/server-bun.ts",
     "dev": "bun --watch src/server-bun.ts",
     "test": "bun test",
-    
     "db:migrate": "bun src/modules/shared/infra/postgres/migrations/iam.migration.ts && bun src/modules/shared/infra/postgres/migrations/notification.migration.ts",
     "db:seed": "bun src/modules/shared/infra/postgres/migrations/seed.migration.ts",
     "db:setup": "bun run db:migrate && bun run db:seed",
-    
     "docker:up": "docker-compose up -d --build",
-    
-    "legacy:start": "bun src/index.ts",
+    "legacy:start": "bun --watch src/index.ts",
     "legacy:dev": "bun --watch src/index.ts"
   },
   "keywords": [
@@ -49,15 +46,16 @@
   "author": "Conecta Social Team",
   "license": "ISC",
   "dependencies": {
-    "zod": "^3.22.4",
+    "@hono/zod-openapi": "^1.2.0",
+    "dotenv": "^16.4.5",
     "resend": "^3.2.0",
-    "dotenv": "^16.4.5"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "typescript": "^5.0.0"
   },
   "peerDependencies": {
-    "hono": "^4.0.0" 
+    "hono": "^4.11.7"
   }
 }

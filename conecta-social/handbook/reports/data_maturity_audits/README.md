@@ -19,3 +19,4 @@ Exemplo: `2026-01-22-iam-notifications-audit.md`
 
 ## Relatórios Gerados
 - `2026-01-22-iam-notifications-audit.md`: Auditoria inicial dos módulos IAM e Notifications.
+- `2026-02-03-iam-bff-http-audit.md`: Auditoria de BFF IAM e padronização HTTP.

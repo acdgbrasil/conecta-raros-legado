@@ -1,51 +1,44 @@
 # 🔐 IAM API Reference
 
-Endpoints de autenticação e gestão de usuários montados sob o prefixo `/api`.
+Endpoints de autenticação via BFF web/mobile, montados sob o prefixo `/iam`.
 
-## Autenticação
+## BFF Web
 
-### Login (`POST /auth/login`)
-Retorna `accessToken` e `refreshToken`.
+### Login (`POST /iam/web/auth/login`)
+Retorna `accessToken` e `user`. O `refreshToken` é enviado em cookie `HttpOnly`.
 
 ```bash
-curl -X POST http://localhost:3000/api/auth/login \
+curl -X POST http://localhost:3000/iam/web/auth/login \
   -H "Content-Type: application/json" \
-  -d "{    "email": "admin@conectasocial.com.br",    "password": "secure_password"  }"
+  -d '{ "email": "admin@conectasocial.com.br", "password": "secure_password" }'
 ```
 
-### Refresh (`POST /auth/refresh`)
+### Refresh (`POST /iam/web/auth/refresh`)
+Rotaciona o refresh token via cookie e devolve novo `accessToken`.
+
 ```bash
-curl -X POST http://localhost:3000/api/auth/refresh \
-  -H "Content-Type: application/json" \
-  -d '{"refreshToken": "YOUR_REFRESH_TOKEN"}'
-```
-
----
-
-## Gestão de Usuários (Protegido)
-
-### Perfil (`GET /users/me`)
-```bash
-curl -X GET http://localhost:3000/api/users/me \
-  -H "Authorization: Bearer <TOKEN>"
-```
-
-### Criar Usuário (`POST /users`)
-```bash
-curl -X POST http://localhost:3000/api/users \
-  -H "Authorization: Bearer <TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{    "name": "Novo Usuário",    "email": "novo@example.com",    "role": "user"  }'
+curl -X POST http://localhost:3000/iam/web/auth/refresh \
+  -H "Content-Type: application/json"
 ```
 
 ---
 
-## Administração (Protegido)
+## BFF Mobile
 
-### Alterar Cargo (`PATCH /users/:id/role`)
+### Login (`POST /iam/mobile/login`)
+Retorna `accessToken`, `refreshToken` e `user`.
+
 ```bash
-curl -X PATCH http://localhost:3000/api/users/<USER_ID>/role \
-  -H "Authorization: Bearer <TOKEN>" \
+curl -X POST http://localhost:3000/iam/mobile/login \
   -H "Content-Type: application/json" \
-  -d '{"role": "admin"}'
+  -d '{ "email": "admin@conectasocial.com.br", "password": "secure_password" }'
+```
+
+### Refresh (`POST /iam/mobile/refresh`)
+Rotaciona o refresh token enviado no payload.
+
+```bash
+curl -X POST http://localhost:3000/iam/mobile/refresh \
+  -H "Content-Type: application/json" \
+  -d '{ "refreshToken": "YOUR_REFRESH_TOKEN" }'
 ```

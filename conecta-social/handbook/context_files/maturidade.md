@@ -4,7 +4,7 @@ Este documento rastreia a evolução da maturidade de dados do projeto com base 
 
 ## 📊 Status Geral: Nível 3 (Definido)
 
-> **Última Atualização:** 23/01/2026
+> **Última Atualização:** 03/02/2026
 > **Responsável:** Data-Maturity-Reviewer
 
 ---
@@ -14,7 +14,7 @@ Este documento rastreia a evolução da maturidade de dados do projeto com base 
 ### 1. Qualidade de Dados (Nível 3 - Definido)
 - [x] Uso de Schemas Zod para todas as entradas e saídas.
 - [x] Validação de tipos complexos (Email, UUIDv7, Senhas Fortes).
-- [ ] **Ponto Crítico:** Serialização de erros de validação está poluída (JSON stringified), dificultando o consumo (Nível 2 em Usabilidade Técnica).
+- [ ] **Ponto de Atenção:** Respostas de erro estruturadas existem, mas dependem de `JSON.parse(error.message)` para erros de validação.
 - [ ] Implementação de *Branded Types* para identificadores de domínio.
 
 ### 2. Conhecimento sobre os Dados (Nível 4 - Gerenciado)
@@ -37,5 +37,6 @@ Este documento rastreia a evolução da maturidade de dados do projeto com base 
 ---
 
 ## 📝 Histórico de Evolução
+- **03/02/2026**: BFF web/mobile para IAM; respostas HTTP padronizadas e cookies seguros.
 - **23/01/2026**: Auditoria de Erros e Segurança. Identificada falha na geração de OTP e na formatação de mensagens do Zod.
 - **20/01/2026**: Monorepo Refactor. Consolidação da infraestrutura baseada em Clean Architecture.

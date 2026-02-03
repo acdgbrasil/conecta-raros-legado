@@ -9,6 +9,7 @@ import {
   ResetPasswordResponseSchema 
 } from "./outputs/AuthResponses.output";
 import { TokenPayloadSchema, TokenPayloadDTO } from "./outputs/TokenPayload.output";
+import { HTTP_STATUS } from "@modules/shared/types/http/http.status";
 
 export class AuthMapper {
   public static readonly Schemas = {
@@ -28,7 +29,7 @@ export class AuthMapper {
   };
 
   // Validadores de Input
-  public static validateLogin(raw: unknown): LoginDTO { return LoginSchema.parse(raw); }
+  public static validateLogin(raw: {email: string, password: string}): LoginDTO { return LoginSchema.parse(raw); }
   public static validateRefresh(raw: unknown): RefreshTokenDTO { return RefreshTokenSchema.parse(raw); }
   public static validateForgotPassword(raw: unknown): ForgotPasswordDTO { return ForgotPasswordSchema.parse(raw); }
   public static validateResetPassword(raw: unknown): ResetPasswordDTO { return ResetPasswordSchema.parse(raw); }
@@ -38,4 +39,31 @@ export class AuthMapper {
 
   // Validadores de Resposta (Double Check)
   public static toLoginResponse(data: unknown): LoginResponseDTO { return LoginResponseSchema.parse(data); }
+  public static toRefreshResponse(data: unknown) { return RefreshTokenResponseSchema.parse(data); }
+
+  // HTTP ACL helpers
+  public static response = {
+    ok<T>(data: T, headers: HeadersInit = { "Content-Type": "application/json" }) {
+      return {
+        body: { data },
+        init: {
+          status: HTTP_STATUS["2XX"].OK.code,
+          statusText: HTTP_STATUS["2XX"].OK.message,
+          headers: new Headers(headers)
+        } as ResponseInit
+      };
+    },
+    okNoStore<T>(data: T, headers: HeadersInit = { "Content-Type": "application/json" }) {
+      const merged = new Headers(headers);
+      merged.set("Cache-Control", "no-store");
+      return {
+        body: { data },
+        init: {
+          status: HTTP_STATUS["2XX"].OK.code,
+          statusText: HTTP_STATUS["2XX"].OK.message,
+          headers: merged
+        } as ResponseInit
+      };
+    }
+  };
 }

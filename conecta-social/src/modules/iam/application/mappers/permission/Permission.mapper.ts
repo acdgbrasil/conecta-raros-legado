@@ -55,7 +55,7 @@ export class PermissionMapper {
     return PermissionPersistenceCodec.encode(permission);
   }
 
-  public static fromPersistence(raw: unknown): Permission {
+  public static fromPersistence(raw: PermissionPersistenceDTO): Permission {
     return PermissionPersistenceCodec.decode(raw);
   }
 }

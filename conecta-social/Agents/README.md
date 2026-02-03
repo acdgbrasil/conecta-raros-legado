@@ -15,12 +15,30 @@ Live Docs (local):
 ```
 python3 /Users/gabriel_aderaldo/Desktop/dev/envolve/legado/conecta-social/handbook/tooling/tooling-ia/rag.py query "<pergunta>" -k 10 --context
 ```
+Notes:
+- Keep queries short (3-6 keywords) and avoid dots/colons (use spaces).
+- Start with `-k 8` to `-k 12`, increase only if missing sections.
+- Always cite sources as `arquivo:linha-inicio-linha-fim`.
+
+## RAG Maintenance (refresh indexes)
+Tooling Docs (versioned):
+```
+python3 /Users/gabriel_aderaldo/Desktop/dev/envolve/legado/conecta-social/handbook/tooling/tooling-ia/rag.py --config /Users/gabriel_aderaldo/Desktop/dev/envolve/legado/conecta-social/handbook/tooling/tooling-ia/rag_tooling.yaml build
+```
+Live Docs (local):
+```
+python3 /Users/gabriel_aderaldo/Desktop/dev/envolve/legado/conecta-social/handbook/tooling/tooling-ia/rag.py build
+```
+Index stats:
+```
+python3 /Users/gabriel_aderaldo/Desktop/dev/envolve/legado/conecta-social/handbook/tooling/tooling-ia/rag.py --config /Users/gabriel_aderaldo/Desktop/dev/envolve/legado/conecta-social/handbook/tooling/tooling-ia/rag_tooling.yaml stats
+```
 
 ## Routing Map (by index)
 - Bun: `Bun_Specialist.md`
 - ElysiaJS: `ElysiaJS_Specialist.md`
 - Hono + Zod OpenAPI: `Hono_Zod_OpenAPI_Specialist.md`
-- HTTP: `HTTP_Specialist.md`
+- HTTP (RFCs/status/notes in `handbook/tooling/http/**`): `HTTP_Specialist.md`
 - LGPD Quick Reference: `LGPD_Specialist.md`
 - LGPD Review/Audit: `LGPD_Reviewer.md`
 - Mongoose: `Mongoose_Specialist.md`
@@ -38,6 +56,7 @@ python3 /Users/gabriel_aderaldo/Desktop/dev/envolve/legado/conecta-social/handbo
 - LGPD audit/RIPD/report → `LGPD_Reviewer.md`
 - Mongoose schema design/perf → `Mongoose_Specialist.md` (+ `MongoDB_Architect_Agent.md` if needed)
 - Postgres schema/perf → `PostgreSQL_Specialist.md` (+ `PGSQL_ARCH_Agent.md` if needed)
+- HTTP (RFCs/status/semantics/caching) → `HTTP_Specialist.md`
 - Runtime/tooling error → `Live_Docs_Specialist.md` (log it and pause)
 
 ## Error learning

@@ -16,4 +16,6 @@ Exemplo: `2026-01-22-auditoria-inicial.md`
 6.  **Status do RIPD:** Necessidade de atualização do Relatório de Impacto.
 
 ## Histórico
-*Nenhum relatório gerado ainda.*
+- `2026-01-22-iam-module-audit.md`: Auditoria LGPD do módulo IAM.
+- `2026-01-23-iam-pii-audit.md`: Auditoria de segurança e integridade (OTP e PII).
+- `2026-02-03-iam-bff-cookies-audit.md`: Auditoria BFF web/mobile com cookies seguros.
