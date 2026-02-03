@@ -1,131 +1,142 @@
-Início: Wed Jan 28 00:15:44 -03 2026
+Início: Thu Jan 29 14:45:00 -03 2026
 --- STEP: 1. Análise Estática (Backend - Bun Native) ---
-Bundled 169 modules in 84ms
+Bundled 215 modules in 158ms
 
-  index.js  0.65 MB  (entry point)
+  server-bun.js  0.66 MB  (entry point)
 
 --- STEP: 1. Análise Estática (Frontend - Bun) ---
 $ eslint
 --- STEP: 2. Verificação Básica de Segurança ---
 --- STEP: 3. Docker Build Check ---
- Image docker-frontend Building 
  Image docker-backend Building 
+ Image docker-frontend Building 
 #1 [internal] load local bake definitions
 #1 reading from stdin 1.10kB done
 #1 DONE 0.0s
 
-#2 [frontend internal] load build definition from Dockerfile
-#2 transferring dockerfile: 1.33kB done
+#2 [backend internal] load build definition from Dockerfile
+#2 transferring dockerfile: 625B 0.0s done
 #2 DONE 0.0s
 
-#3 [backend internal] load build definition from Dockerfile
-#3 transferring dockerfile: 713B done
+#3 [frontend internal] load build definition from Dockerfile
+#3 transferring dockerfile: 1.33kB 0.0s done
 #3 DONE 0.0s
 
-#4 [frontend internal] load metadata for docker.io/oven/bun:1-alpine
-#4 DONE 0.6s
+#4 [backend internal] load metadata for docker.io/oven/bun:1-alpine
+#4 ...
 
-#5 [frontend internal] load .dockerignore
-#5 transferring context: 2B done
+#5 [auth] oven/bun:pull token for registry-1.docker.io
 #5 DONE 0.0s
 
-#6 [backend internal] load .dockerignore
-#6 transferring context: 232B done
+#4 [backend internal] load metadata for docker.io/oven/bun:1-alpine
+#4 DONE 1.2s
+
+#6 [frontend internal] load .dockerignore
+#6 transferring context: 2B done
 #6 DONE 0.0s
 
-#7 [backend 1/5] FROM docker.io/oven/bun:1-alpine@sha256:9953df496cc148c446edb99bf0955665681514da0b1daafca1db9ad7c3327c08
-#7 resolve docker.io/oven/bun:1-alpine@sha256:9953df496cc148c446edb99bf0955665681514da0b1daafca1db9ad7c3327c08 done
+#7 [backend internal] load .dockerignore
+#7 transferring context: 232B 0.0s done
 #7 DONE 0.0s
 
-#8 [backend internal] load build context
-#8 transferring context: 47.18kB 0.0s done
+#8 [frontend 1/4] FROM docker.io/oven/bun:1-alpine@sha256:b0885548002187f088af5c7e04008f852c0a30cbe4192b5d75c3266a7f0b01f5
+#8 resolve docker.io/oven/bun:1-alpine@sha256:b0885548002187f088af5c7e04008f852c0a30cbe4192b5d75c3266a7f0b01f5 done
 #8 DONE 0.0s
 
-#9 [backend 3/5] RUN bun upgrade
-#9 CACHED
+#9 [frontend internal] load build context
+#9 ...
 
-#10 [backend 2/5] WORKDIR /app
-#10 CACHED
+#10 [backend internal] load build context
+#10 transferring context: 99.77kB 0.3s done
+#10 DONE 0.3s
 
-#11 [backend 4/5] COPY . .
+#9 [frontend internal] load build context
+#9 ...
+
+#11 [backend 2/4] WORKDIR /app
 #11 CACHED
 
-#12 [backend 5/5] RUN rm -rf node_modules src/modules/*/node_modules && bun install
+#12 [backend 3/4] COPY . .
 #12 CACHED
 
-#13 [backend] exporting to image
-#13 exporting layers done
-#13 exporting manifest sha256:f0e40528d153c577371740799be536c0721b09798955d6f60b772735fdc36f1a done
-#13 exporting config sha256:334523971651a53987748aa2e5ddeb08da10413a84147d3af6fad38bb439c61b done
-#13 exporting attestation manifest sha256:e02133190b878ce1719597a9c51e05bacb9f971399730e9f7ea8eaa21cdec150
-#13 exporting attestation manifest sha256:e02133190b878ce1719597a9c51e05bacb9f971399730e9f7ea8eaa21cdec150 0.0s done
-#13 exporting manifest list sha256:8abc2660ffdec6861b414f2cca4b4670f4e792d7c36891ee42e1382a17198e44 done
-#13 naming to docker.io/library/docker-backend:latest done
-#13 unpacking to docker.io/library/docker-backend:latest 0.0s done
-#13 DONE 0.1s
+#13 [backend 4/4] RUN rm -rf node_modules src/modules/*/node_modules && bun install
+#13 CACHED
 
-#14 [frontend internal] load build context
-#14 ...
+#9 [frontend internal] load build context
+#9 ...
+
+#14 [backend] exporting to image
+#14 exporting layers done
+#14 exporting manifest sha256:d8a26ad5a51348f51632be00626e66f384eb993d99b7e59cba3ba0d564c438a1 done
+#14 exporting config sha256:206ef2d61ed9490883183256cd3266d77fd2a18f6f4b4438dcc14588a81f754f done
+#14 exporting attestation manifest sha256:6479b197ca1e213a9aef514232d1a6245f465b40cc6df6d34f2626f4b7e58534 0.0s done
+#14 exporting manifest list sha256:5dd0e426c9f9a2279369f62bb56e49d61d92fa3dc090222d2b3b8dce1aeaa7f3 0.0s done
+#14 naming to docker.io/library/docker-backend:latest done
+#14 unpacking to docker.io/library/docker-backend:latest done
+#14 DONE 0.2s
+
+#9 [frontend internal] load build context
+#9 ...
 
 #15 [backend] resolving provenance for metadata file
 #15 DONE 0.0s
 
-#14 [frontend internal] load build context
-#14 transferring context: 1.67MB 1.0s done
-#14 DONE 1.0s
+#9 [frontend internal] load build context
+#9 transferring context: 1.67MB 1.4s done
+#9 DONE 1.5s
 
-#16 [frontend runner 11/16] COPY --from=builder /app/src ./src
+#16 [frontend runner  5/16] COPY --from=builder /app/public ./public
 #16 CACHED
 
-#17 [frontend runner  6/16] COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+#17 [frontend runner 12/16] COPY --from=builder /app/tsconfig.json ./
 #17 CACHED
 
-#18 [frontend runner  7/16] COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+#11 [frontend 2/4] WORKDIR /app
+#11 CACHED
+
+#18 [frontend runner  8/16] COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 #18 CACHED
 
-#19 [frontend builder 5/6] COPY . .
+#19 [frontend builder 4/6] RUN bun install
 #19 CACHED
 
-#20 [frontend runner 14/16] COPY --from=builder /app/postcss.config.mjs ./
+#20 [frontend builder 5/6] COPY . .
 #20 CACHED
 
-#21 [frontend runner 15/16] COPY --from=builder /app/eslint.config.mjs ./
+#21 [frontend runner  4/16] RUN adduser --system --uid 1001 nextjs
 #21 CACHED
 
-#22 [frontend runner  9/16] COPY --from=builder /app/node_modules ./node_modules
+#22 [frontend builder 3/6] COPY package.json bun.lock ./
 #22 CACHED
 
-#23 [frontend runner 10/16] COPY --from=builder /app/package.json ./
+#23 [frontend runner  3/16] RUN addgroup --system --gid 1001 nodejs
 #23 CACHED
 
-#24 [frontend runner 13/16] COPY --from=builder /app/next.config.ts ./
+#24 [frontend runner  7/16] COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 #24 CACHED
 
 #25 [frontend builder 6/6] RUN bun run build
 #25 CACHED
 
-#26 [frontend runner  5/16] COPY --from=builder /app/public ./public
+#26 [frontend runner 11/16] COPY --from=builder /app/src ./src
 #26 CACHED
 
-#10 [frontend 2/5] WORKDIR /app
-#10 CACHED
-
-#27 [frontend builder 4/6] RUN bun install
+#27 [frontend runner 10/16] COPY --from=builder /app/package.json ./
 #27 CACHED
 
-#28 [frontend runner 12/16] COPY --from=builder /app/tsconfig.json ./
+#28 [frontend runner 13/16] COPY --from=builder /app/next.config.ts ./
 #28 CACHED
 
-#29 [frontend builder 3/6] COPY package.json bun.lock ./
+#29 [frontend runner  6/16] COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 #29 CACHED
 
-#30 [frontend runner  8/16] COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+#30 [frontend runner  9/16] COPY --from=builder /app/node_modules ./node_modules
 #30 CACHED
 
-#31 [frontend runner  3/16] RUN addgroup --system --gid 1001 nodejs
+#31 [frontend runner 14/16] COPY --from=builder /app/postcss.config.mjs ./
 #31 CACHED
 
-#32 [frontend runner  4/16] RUN adduser --system --uid 1001 nextjs
+#32 [frontend runner 15/16] COPY --from=builder /app/eslint.config.mjs ./
 #32 CACHED
 
 #33 [frontend runner 16/16] RUN chown -R nextjs:nodejs /app
@@ -133,142 +144,83 @@ $ eslint
 
 #34 [frontend] exporting to image
 #34 exporting layers done
-#34 exporting manifest sha256:6a35a72a988c54019ae810edd56c4b9dda44e4e0e0613cc70e243e01c312a0e8 done
-#34 exporting config sha256:47ce9baeb58c97870cbc8b7b252665be91476f117b1791b84c0a8a54a5b1fa14 done
-#34 exporting attestation manifest sha256:89301d2f8a17e286caff3e38d632a8f4555dfcb85c961891112b657695324c54 done
-#34 exporting manifest list sha256:c54ad6a0c77f3351b01c07bed8b8f9acac0e125fee757676d654f8ac180777a5 done
+#34 exporting manifest sha256:9951f495546a068ac96bc63091160890eebd964fc63f80efd862ab311b260002 done
+#34 exporting config sha256:ddbcba10211bf9d7f69d0442916fe7eeb0724301c0feb18c2519b1755911af48 done
+#34 exporting attestation manifest sha256:a6eeed462b5ab2ef98d23bbccf04b717de67bf3ddfa419b5cc6c0eecaf534e7a 0.0s done
+#34 exporting manifest list sha256:45c74498a62b8bd5699df151982889bcb21ec49f3472cedaeb3af5b74f5fc799 done
 #34 naming to docker.io/library/docker-frontend:latest done
 #34 unpacking to docker.io/library/docker-frontend:latest done
-#34 DONE 0.0s
+#34 DONE 0.1s
 
 #35 [frontend] resolving provenance for metadata file
 #35 DONE 0.0s
  Image docker-backend Built 
  Image docker-frontend Built 
 --- STEP: 4. Testes de Integração (Ambiente CI) ---
-time="2026-01-28T00:15:50-03:00" level=warning msg="Found orphan containers ([conecta-proxy]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+time="2026-01-29T14:45:07-03:00" level=warning msg="Found orphan containers ([conecta-proxy]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
  Container conecta-mongo-ci Running 
  Container conecta-postgres-ci Running 
  Container conecta-backend Recreate 
  Container conecta-backend Recreated 
  Container conecta-frontend Recreate 
  Container conecta-frontend Recreated 
- Container conecta-mongo-ci Waiting 
  Container conecta-postgres-ci Waiting 
+ Container conecta-mongo-ci Waiting 
  Container conecta-postgres-ci Healthy 
  Container conecta-mongo-ci Healthy 
  Container conecta-backend Starting 
  Container conecta-backend Started 
  Container conecta-frontend Starting 
  Container conecta-frontend Started 
-$ bun src/modules/shared/infra/postgres/migrations/iam.migration.ts
+$ bun src/modules/shared/infra/postgres/migrations/iam.migration.ts && bun src/modules/shared/infra/postgres/migrations/notification.migration.ts
 🛠️  Iniciando Migração das Tabelas IAM...
 ✅ Postgres Connected (Bun.sql)
 ✅ Tabelas IAM (re)criadas com sucesso!
-$ bun src/modules/shared/infra/postgres/migrations/seed.migration.ts
-🌱 Iniciando Seed do IAM...
+🛠️  Criando tabelas de Notificações...
 ✅ Postgres Connected (Bun.sql)
-✅ Seed IAM Concluído!
-   Admin Role ID: 019c0296-90c4-7a84-89e6-67f7aaa8c076
-   User: gabriel.aderaldo@acdgbrasil.com.br
+✅ Tabela 'notifications' pronta.
+$ bun src/modules/shared/infra/postgres/migrations/seed.migration.ts
+🌱 Iniciando Seed IAM (Bootstrap)...
+✅ Postgres Connected (Bun.sql)
+   --> Semeando Permissões Essenciais...
+   --> Semeando Role SuperAdmin...
+   --> Criando Root User (gabriel_aderaldo@edu.unifor.br)...
+✅ IAM Bootstrap Concluído!
+   🔑 SuperAdmin Role ID: 019c0adb-fcf8-7175-a340-afdced1fc062
 Resolving dependencies
 Resolved, downloaded and extracted [2]
 Saved lockfile
-IAM/Auth/Login (401 Unauthorized) - 120 ms
-Tests
-   ✕ Deve retornar token JWT
-      expected undefined to be a string
-Assertions
-   ✕ res.status: eq 200
-      expected 401 to equal 200
-   ✕ res.body.token: isString
-      expected undefined to be a string
-IAM/Auth/Refresh Token (401 Unauthorized) - 4 ms
-Tests
-   ✓ Deve retornar novo token
-Assertions
-   ✕ res.status: eq 200
-      expected 401 to equal 200
-   ✕ res.body.token: isString
-      expected undefined to be a string
-IAM/Auth/Forgot Password (400 Bad Request) - 9 ms
-Assertions
-   ✕ res.status: eq 200
-      expected 400 to equal 200
-IAM/Auth/Reset Password (400 Bad Request) - 5 ms
-❌ Erro no Reset Password: {
-  "message": "Código de recuperação inválido ou expirado."
-}
-Tests
-   ✕ Deve redefinir a senha com sucesso
-      expected 400 to equal 200
-Assertions
-   ✕ res.status: eq 200
-      expected 400 to equal 200
-   ✕ res.body.message: eq "Senha redefinida com sucesso."
-      expected 'Código de recuperação inválido ou exp…' to equal 'Senha redefinida com sucesso.'
-IAM/Users/Get Profile (401 Unauthorized) - 3 ms
-Assertions
-   ✕ res.status: eq 200
-      expected 401 to equal 200
-   ✕ res.body.email: eq admin@conecta.com
-      expected undefined to equal 'admin@conecta.com'
-   ✕ res.body.role: eq ADMIN
-      expected undefined to equal 'ADMIN'
-IAM/Users/Create User (401 Unauthorized) - 1 ms
-Assertions
-   ✕ res.status: eq 201
-      expected 401 to equal 201
-   ✕ res.body.id: isString
-      expected undefined to be a string
-IAM/Users/List Users (401 Unauthorized) - 1 ms
-Assertions
-   ✕ res.status: eq 200
-      expected 401 to equal 200
-   ✕ res.body.data: isArray
-      expected undefined to be an array
-   ✕ res.body.meta.total: isNumber
-      expected { name: 'TypeError', …(2) } to be a number
-IAM/Users/Update User (401 Unauthorized) - 2 ms
-Assertions
-   ✕ res.status: eq 200
-      expected 401 to equal 200
-   ✕ res.body.name: eq Bruno Updated
-      expected undefined to equal 'Bruno Updated'
-IAM/Users/Change Role (401 Unauthorized) - 2 ms
-Assertions
-   ✕ res.status: eq 200
-      expected 401 to equal 200
-   ✕ res.body.role: eq ADMIN
-      expected undefined to equal 'ADMIN'
-IAM/Users/Change Status (401 Unauthorized) - 1 ms
-Assertions
-   ✕ res.status: eq 200
-      expected 401 to equal 200
-   ✕ res.body.status: eq BLOCKED
-      expected undefined to equal 'BLOCKED'
-Health Check (200 OK) - 1 ms
-Tests
-   ✓ Deve responder em menos de 500ms
-   ✓ Deve ter um timestamp válido
-Assertions
-   ✓ res.status: eq 200
-   ✓ res.body.status: eq ok
+IAM/Auth/Login (read ECONNRESET)
+IAM/Auth/Refresh Token (read ECONNRESET)
+IAM/Auth/Forgot Password (read ECONNRESET)
+IAM/Auth/Reset Password (read ECONNRESET)
+IAM/Permissions/List Permissions (read ECONNRESET)
+IAM/Roles/Create Role (read ECONNRESET)
+IAM/Roles/List Roles (read ECONNRESET)
+IAM/Roles/Update Role (read ECONNRESET)
+IAM/Roles/Delete Role (read ECONNRESET)
+IAM/Users/Get Profile (read ECONNRESET)
+IAM/Users/Create User (read ECONNRESET)
+IAM/Users/List Users (read ECONNRESET)
+IAM/Users/Update User (read ECONNRESET)
+IAM/Users/Change Role (read ECONNRESET)
+IAM/Users/Change Status (read ECONNRESET)
+Health Check (read ECONNRESET)
 
 📊 Execution Summary
-┌───────────────┬──────────────────────────┐
-│ Metric        │          Result          │
-├───────────────┼──────────────────────────┤
-│ Status        │          ✗ FAIL          │
-├───────────────┼──────────────────────────┤
-│ Requests      │ 11 (1 Passed, 10 Failed) │
-├───────────────┼──────────────────────────┤
-│ Tests         │           3/5            │
-├───────────────┼──────────────────────────┤
-│ Assertions    │           2/23           │
-├───────────────┼──────────────────────────┤
-│ Duration (ms) │           149            │
-└───────────────┴──────────────────────────┘
+┌───────────────┬────────────────┐
+│ Metric        │     Result     │
+├───────────────┼────────────────┤
+│ Status        │     ✗ FAIL     │
+├───────────────┼────────────────┤
+│ Requests      │ 16 (16 Failed) │
+├───────────────┼────────────────┤
+│ Tests         │      0/0       │
+├───────────────┼────────────────┤
+│ Assertions    │      0/0       │
+├───────────────┼────────────────┤
+│ Duration (ms) │       0        │
+└───────────────┴────────────────┘
 
 From v3.0.0 onwards, the default sandbox mode is changed to safe. Use --sandbox=developer to run in developer mode.
 See additional breaking changes at https://www.usebruno.com/v3-release

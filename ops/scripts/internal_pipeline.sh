@@ -62,7 +62,7 @@ log_step "1. Análise Estática (Backend - Bun Native)"
 echo -n "Verificando compilação (Bun Build) no Backend... "
 cd conecta-social
 # Executa em background para o spinner funcionar
-(bun build ./src/index.ts --outdir /tmp/bun-check --target bun >> ../"$LOG_FILE" 2>&1) &
+(bun build ./src/server-bun.ts --outdir /tmp/bun-check --target bun >> ../"$LOG_FILE" 2>&1) &
 spinner $!
 wait $!
 if [ $? -eq 0 ]; then
@@ -139,8 +139,8 @@ echo -e "${GREEN}OK${NC}"
 
 echo -n "Executando Migrações e Seeds no ambiente de CI... "
 (
-    docker exec conecta-backend bun run migrate:iam >> "$LOG_FILE" 2>&1 && \
-    docker exec conecta-backend bun run seed:iam >> "$LOG_FILE" 2>&1
+    docker exec conecta-backend bun run db:migrate >> "$LOG_FILE" 2>&1 && \
+    docker exec conecta-backend bun run db:seed >> "$LOG_FILE" 2>&1
 ) &
 spinner $!
 wait $!

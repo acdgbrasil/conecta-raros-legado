@@ -4,7 +4,7 @@ Este documento rastreia a evolução da conformidade do projeto com a LGPD, mant
 
 ## 📊 Nível Atual: Nível 2 - Repetível (Reativo)
 
-> **Última Atualização:** 23/01/2026
+> **Última Atualização:** 03/02/2026
 > **Responsável:** LGPD Reviewer Agent
 
 ---
@@ -35,6 +35,13 @@ Este documento rastreia a evolução da conformidade do projeto com a LGPD, mant
 ---
 
 ## 📝 Histórico de Ações
+
+### 03/02/2026 - BFF Web/Mobile (IAM)
+- **Ação:** Revisão de cookies seguros e minimização de resposta.
+- **Resultados:**
+    - Refresh token em cookie `HttpOnly`/`Secure`/`SameSite=Strict` para web.
+    - Respostas padronizadas com payload de erro estruturado.
+- **Relatório:** `handbook/reports/lgpd_audits/2026-02-03-iam-bff-cookies-audit.md`.
 
 ### 23/01/2026 - Auditoria de Segurança e Integridade
 - **Ação:** Revisão do fluxo de recuperação de senha e integridade referencial.

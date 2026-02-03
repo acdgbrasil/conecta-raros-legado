@@ -7,7 +7,7 @@ Este documento detalha todas as variáveis de ambiente necessárias para rodar a
 ## Aplicação
 | Variável | Descrição | Padrão | Obrigatório? |
 | :--- | :--- | :--- | :--- |
-| `PORT` | Porta onde o servidor HTTP (Hono) irá escutar. | `3000` | Não |
+| `PORT` | Porta onde o servidor HTTP (Bun Native) irá escutar. | `3000` | Não |
 | `NODE_ENV` | Ambiente de execução (`development`, `production`, `test`). | `development` | Sim |
 
 ## Banco de Dados (PostgreSQL)

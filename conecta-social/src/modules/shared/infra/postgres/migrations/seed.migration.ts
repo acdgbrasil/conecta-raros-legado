@@ -1,4 +1,5 @@
 import { pg } from "../client/postgres.client";
+import { PermissionMapper } from "../../../../iam/application/mappers/permission/Permission.mapper";
 
 export async function seedIAM() {
   console.log("🌱 Iniciando Seed IAM (Bootstrap)...");
@@ -10,17 +11,23 @@ export async function seedIAM() {
     const adminPass = Bun.env.SUPER_ADM_PASSWORD || "admin_password";
 
     // =================================================================
-    // 1. PERMISSÕES DE BOOTSTRAP (Apenas o necessário para gerir o IAM)
+    // 1. PERMISSÕES DE BOOTSTRAP (Usando a Lei definida no Mapper)
     // =================================================================
     console.log("   --> Semeando Permissões Essenciais...");
     
-    // Sem essas permissões, o Admin não consegue criar outras roles ou usuários.
+    const { IAM_PERMISSIONS: P } = PermissionMapper;
+
     const bootstrapPermissions = [
-      { slug: 'users:read', description: 'Listar usuários', module: 'iam' },
-      { slug: 'users:write', description: 'Criar/Editar usuários', module: 'iam' },
-      { slug: 'roles:read', description: 'Listar cargos', module: 'iam' },
-      { slug: 'roles:write', description: 'Gerenciar cargos e permissões', module: 'iam' },
-      { slug: 'permissions:read', description: 'Listar permissões disponíveis', module: 'iam' }
+      { slug: P.USERS.CREATE, description: 'Criar usuários', module: 'iam' },
+      { slug: P.USERS.READ, description: 'Listar usuários', module: 'iam' },
+      { slug: P.USERS.UPDATE, description: 'Editar detalhes de usuários', module: 'iam' },
+      { slug: P.USERS.STATUS, description: 'Ativar/Desativar usuários (Last Admin protection)', module: 'iam' },
+      { slug: P.ROLES.CREATE, description: 'Criar novos cargos customizados', module: 'iam' },
+      { slug: P.ROLES.READ, description: 'Listar cargos e suas permissões', module: 'iam' },
+      { slug: P.ROLES.UPDATE, description: 'Editar permissões e nomes de cargos', module: 'iam' },
+      { slug: P.ROLES.DELETE, description: 'Remover cargos (Role in use protection)', module: 'iam' },
+      { slug: P.ROLES.ASSIGN, description: 'Atribuir ou trocar cargos de usuários', module: 'iam' },
+      { slug: P.PERMISSIONS.READ, description: 'Listar catálogo de permissões do sistema', module: 'iam' }
     ];
 
     for (const p of bootstrapPermissions) {

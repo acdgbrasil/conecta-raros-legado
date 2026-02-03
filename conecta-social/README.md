@@ -1,9 +1,9 @@
 # Conecta Social API
 
-API em **Monolito Modular (Monorepo)** com **Bun**, focada em performance, DX e manutenibilidade. O projeto aplica **Clean Architecture**, **DDD** e **Event-Driven Design**, com módulos isolados por domínio.
+API em **Monolito Modular (Monorepo)** com **Bun Native**, focada em performance, DX e manutenibilidade. O projeto aplica **Clean Architecture**, **DDD** e **Event-Driven Design**, com módulos isolados por domínio e BFF web/mobile para o IAM.
 
 ## Status do Projeto
-- **IAM (`@modules/iam`)**: gestão de identidades, autenticação e autorização.
+- **IAM (`@modules/iam`)**: gestão de identidades, autenticação e autorização (BFF web/mobile).
 - **Notifications (`@modules/notifications`)**: orquestração de mensageria.
 - **Shared (`@modules/shared`)**: kernel compartilhado (banco, validações, eventos).
 - **Social (`@modules/social`)**: **LEGADO/DESATIVADO**. Não utilizar.
@@ -46,22 +46,21 @@ Veja `example.env` para a lista completa. Principais grupos:
 | --- | --- |
 | `bun install` | Instala dependências e linka workspaces. |
 | `bun dev` | Dev com `--watch` (hard restart). |
-| `bun dev:hot` | Dev com `--hot` (soft reload). |
 | `bun start` | Inicia servidor em modo normal. |
 | `bun test` | Testes unitários. |
-| `bun migrate:iam` | Migrações de IAM no Postgres. |
-| `bun migrate:notifications` | Migrações de Notifications no Postgres. |
-| `bun seed:iam` | Seed inicial de IAM. |
-| `bun docker:up` | Sobe ambiente via Docker. |
-| `bun maturity:check` | Gera relatório de maturidade de dados. |
+| `bun run db:migrate` | Migrações de IAM + Notifications no Postgres. |
+| `bun run db:seed` | Seed inicial de IAM. |
+| `bun run db:setup` | Migrações + seed. |
+| `bun run docker:up` | Sobe ambiente via Docker. |
+| `bun run legacy:start` | Inicia servidor legado (descontinuado). |
 
 ## API Reference (Resumo)
-- **Base URL**: `http://localhost:3000/api`
+- **Base URL**: `http://localhost:3000`
 - **Content-Type**: `application/json`
-- **Auth**: Bearer Token (JWT) em `Authorization`
-- **Módulos disponíveis**:
-  - IAM: `/auth/*` e `/users/*`
-  - Notifications: `/notifications/*`
+- **Auth**: Bearer Token (JWT) em `Authorization` quando aplicável
+- **IAM (BFF)**:
+  - Web: `POST /iam/web/auth/login`, `POST /iam/web/auth/refresh`
+  - Mobile: `POST /iam/mobile/login`, `POST /iam/mobile/refresh`
 
 Detalhes e curls em `handbook/api_reference/`.
 
@@ -72,10 +71,10 @@ Consulte `handbook/codebase/README.md` para detalhes. Resumo:
 - **Arquivos**: `PascalCase.tipo.ts` (ex: `Login.useCase.ts`).
 - **Workspaces**: importar módulos via `@modules/*`, evitando caminhos relativos longos.
 - **Zod v4**:
-  - Inputs em `mapper/*.input.ts`.
-  - Outputs em `mapper/*.output.ts`.
-  - Erros no padrão `{ error: "Mensagem personalizada" }`.
-- **Injeção de Dependência**: Pure DI via `*.server.ts`.
+  - Inputs em `application/mappers/**/inputs/*.input.ts`.
+  - Outputs em `application/mappers/**/outputs/*.output.ts`.
+  - Erros no padrão `{ error: { code, message, details? } }`.
+- **Injeção de Dependência**: `GetIt` como container leve (tokens em `infra/di/injections.di.ts`).
 
 ## Qualidade e Guardrails
 Consolidado em `handbook/quality/README.md`:
@@ -98,7 +97,7 @@ Guia completo em `handbook/tooling/README.md`. Destaques:
 - **Workspaces**: `src/modules/*` como pacotes isolados.
 - **Catalogs**: versões centralizadas no `package.json` raiz.
 - **bunfig.toml**: telemetria off, lockfile em texto, workspaces linkados.
-- **Hot Reload**: `bun dev:hot` para recarregar sem reiniciar o processo.
+- **Hot Reload**: use `bun --hot` se precisar, mas o padrão do projeto é `bun --watch`.
 
 ## Governança de Dados
 Guias em `handbook/quality/governance/`:

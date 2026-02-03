@@ -2,9 +2,6 @@
 FROM oven/bun:1-alpine AS base
 WORKDIR /app
 
-# Garante a versão mais recente do Bun para correções no driver SQL
-RUN bun upgrade
-
 # Em desenvolvimento, vamos simplificar para garantir que os Workspaces funcionem.
 # Workspaces dependem de symlinks relativos que quebram facilmente em multi-stage complexos.
 

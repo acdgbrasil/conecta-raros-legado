@@ -16,11 +16,11 @@ auth:bearer {
 
 body:json {
   {
-    "role": "ADMIN"
+    "newRoleId": "{{created_role_id}}"
   }
 }
 
 assert {
   res.status: eq 200
-  res.body.role: eq ADMIN
+  res.body.roleId: eq {{created_role_id}}
 }

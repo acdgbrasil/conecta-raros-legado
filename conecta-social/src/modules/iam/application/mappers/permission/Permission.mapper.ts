@@ -1,6 +1,7 @@
 import { Permission, IPermission } from "../../../domain/permission/permission.entity";
 import { createPermissionId } from "../../../domain/types/identifiers";
 import { PermissionSlug } from "../../../domain/permission/value_objects/PermissionSlug.vo";
+import { SystemPermissions } from "../../../domain/permission/SystemPermissions";
 
 // Pièces modulares
 import { CreatePermissionSchema, CreatePermissionDTO } from "./inputs/CreatePermission.input";
@@ -11,6 +12,13 @@ import { PermissionPersistenceCodec, PermissionPersistenceDTO } from "./persiste
  * PermissionMapper - Fachada Principal para Transformações de Permissão.
  */
 export class PermissionMapper {
+  /**
+   * Catálogo de Permissões do Sistema (ACL).
+   * Atua como Proxy para a definição pura do Domínio, protegendo a integridade
+   * das capacidades do software perante as camadas externas.
+   */
+  public static readonly IAM_PERMISSIONS = SystemPermissions;
+
   public static readonly Schemas = {
     Input: {
       Create: CreatePermissionSchema,
@@ -47,7 +55,7 @@ export class PermissionMapper {
     return PermissionPersistenceCodec.encode(permission);
   }
 
-  public static fromPersistence(raw: unknown): Permission {
+  public static fromPersistence(raw: PermissionPersistenceDTO): Permission {
     return PermissionPersistenceCodec.decode(raw);
   }
 }
